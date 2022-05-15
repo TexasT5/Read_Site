@@ -22,15 +22,13 @@ public class GetInformationInTheLink {
             Elements elements = new UJsoup().getDiv(links).getElementsByTag("body");
             elements.forEach(element -> {
                 element.getElementsByTag("script").dataNodes().forEach(dataNode -> {
-                    String[] splited = dataNode.getWholeData().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
-                    if(splited[0].isEmpty()){
-                        String[] splired = dataNode.getWholeData().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__=");
-                        if(splired[0].isEmpty()){
-                            //System.out.println(splired[1]);
-                            JSONObject jsonObject = new JSONObject(splired[1]);
-                            System.out.println(jsonObject.toString());
-
-                        }
+                    String[] splited = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
+                    if (splited[0].isEmpty()) {
+                        String[] splitProductDetail = splited[1].trim().split("=");
+                        if(splitProductDetail[0].isEmpty()){
+                            String splitBarcode = splitProductDetail[1].trim().split("\"barcode\":")[1];
+                            System.out.println(splitBarcode.split(",")[0]);
+                       }
                     }
                 });
             });

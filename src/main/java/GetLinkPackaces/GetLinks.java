@@ -22,7 +22,7 @@ public class GetLinks {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                for(int i = 1 ; i < 999; i++){
+                for(int i = 1 ; i < 9999; i++){
                     try{
                         new UJsoup().getDiv("https://www.trendyol.com/sr?q="+getBrand+"&qt="+getBrand+"&st="+getBrand+"&os=2&pi="+i)
                                 .select(".p-card-chldrn-cntnr > a")
@@ -31,14 +31,14 @@ public class GetLinks {
                                     String[] getBrandSplit = getHref.split(getBrand);
                                     if(getBrandSplit[0].equals("/")){
                                         try {
-                                            Thread.sleep(1000);
+                                            Thread.sleep(2000);
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
                                         listModel.addElement("https://www.trendyol.com"+getHref);
                                         getInformationInTheLink.getInformationInTheLink("https://www.trendyol.com"+getHref , "Trendyol");
                                         JScrollBar scrollBar =  scrollPane.getVerticalScrollBar();
-                                        scrollBar.setValue(listModel.size() * 1000);
+                                        scrollBar.setValue(listModel.size() * 100);
                                     }
                                 });
                     }catch (Exception e){
