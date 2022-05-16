@@ -27,7 +27,7 @@ public class GetInformationInTheLink {
                         String[] splitProductDetail = splited[1].trim().split("=");
                         if(splitProductDetail[0].isEmpty()){
                             String splitBarcode = splitProductDetail[1].trim().split("\"barcode\":")[1];
-                            System.out.println(splitBarcode.split(",")[0]);
+                            System.out.println(links + splitBarcode.split(",")[0]);
                        }
                     }
                 });
