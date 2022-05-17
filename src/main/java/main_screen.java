@@ -48,7 +48,7 @@ public class main_screen extends JFrame{
                     errorMessageManagement("Marka girilmedi" ,  true);
                 }else{
                     errorMessageLabel.setVisible(false);
-                    getLinks.getLinkInSites(comboBox1.getSelectedItem().toString() , enterUrlGetText.toLowerCase() , listModel , main_scroll_pane);
+                    getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane);
                 }
             }
         });
