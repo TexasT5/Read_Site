@@ -3,6 +3,7 @@ package GetLinkPackaces;
 import Util.UJsoup;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GetLinks {
@@ -43,7 +44,11 @@ public class GetLinks {
                                                 e.printStackTrace();
                                             }
                                             listModel.addElement("https://www.trendyol.com"+getHref);
-                                            getInformationInTheLink.getInformationInTheLink("https://www.trendyol.com"+getHref , "Trendyol");
+                                            try {
+                                                getInformationInTheLink.getInformationInTheLink("https://www.trendyol.com"+getHref , "Trendyol");
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
                                             JScrollBar scrollBar =  scrollPane.getVerticalScrollBar();
                                             scrollBar.setValue(scrollBar.getMaximum());
                                         }

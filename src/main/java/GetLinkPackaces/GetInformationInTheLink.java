@@ -1,14 +1,19 @@
 package GetLinkPackaces;
 
 import Util.UJsoup;
-import netscape.javascript.JSObject;
 import org.json.JSONObject;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GetInformationInTheLink {
-    public void getInformationInTheLink(String link , String getBrand){
+    public void getInformationInTheLink(String link , String getBrand) throws IOException {
         switch (getBrand){
             case "Trendyol":
                  getInformationTrendyolProducts(link);
@@ -17,27 +22,35 @@ public class GetInformationInTheLink {
         }
     }
 
-    private void getInformationTrendyolProducts(String links){
+    private void getInformationTrendyolProducts(String links) throws IOException {
+        File file = new File("D:\\BackEndDevelopment\\Read_Site\\sa.txt");
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        AtomicBoolean isFinish = new AtomicBoolean(false);
+        HashMap<String , Object> objects = new HashMap<>();
         try {
+            if(!file.exists()){
+                file.createNewFile();
+            }
             Elements elements = new UJsoup().getDiv(links).getElementsByTag("body");
             elements.forEach(element -> {
                 element.getElementsByTag("script").dataNodes().forEach(dataNode -> {
-                    String[] splited = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__=");
+                    String[] splited = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
                     if(splited[0].isEmpty()){
-                        String[] splitWindow = splited[1].trim().split("window\\.TYPageName=");
-                        //System.out.println(splitWindow[0]);
-                        JSONObject jsonObject = new JSONObject(splitWindow[0].trim());
-                        jsonObject.getJSONObject("product").toMap().forEach((s, o) -> {
-                            JSONObject jsonObject1 = new JSONObject(o);
-                            if(jsonObject1.get(s) != null){
-                                System.out.println(jsonObject1.get(s));
-                            }
-                        });
+                        System.out.println(splited[1].trim().split("window\\.TYPageName=")[0].trim().split("=")[1].trim());
                     }
                 });
             });
+
+            if(isFinish.get()){
+                bw.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private <T>JSONObject getJsonObject(T getJson){
+        return new JSONObject(getJson);
     }
 }
