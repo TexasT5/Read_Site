@@ -4,11 +4,13 @@ import Util.UJsoup;
 import org.json.JSONObject;
 import org.jsoup.select.Elements;
 
+import javax.naming.PartialResultException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,7 +29,7 @@ public class GetInformationInTheLink {
         FileWriter fw = new FileWriter(file.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fw);
         AtomicBoolean isFinish = new AtomicBoolean(false);
-        HashMap<String , Object> objects = new HashMap<>();
+        ArrayList<String> productDetailsList = new ArrayList<>();
         try {
             if(!file.exists()){
                 file.createNewFile();
@@ -37,7 +39,11 @@ public class GetInformationInTheLink {
                 element.getElementsByTag("script").dataNodes().forEach(dataNode -> {
                     String[] splited = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
                     if(splited[0].isEmpty()){
-                        System.out.println(splited[1].trim().split("window\\.TYPageName=")[0].trim().split("=")[1].trim());
+                        if(splited[1].startsWith(" ")){
+
+                        }else{
+                            System.out.println("Boşluk yok");
+                        }
                     }
                 });
             });
