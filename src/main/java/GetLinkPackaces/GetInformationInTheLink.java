@@ -1,18 +1,20 @@
 package GetLinkPackaces;
 
+import Model.TrendyolModel;
 import Util.UJsoup;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.json.JSONObject;
 import org.jsoup.select.Elements;
 
-import javax.naming.PartialResultException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 
 public class GetInformationInTheLink {
     public void getInformationInTheLink(String link , String getBrand) throws IOException {
@@ -29,7 +31,7 @@ public class GetInformationInTheLink {
         FileWriter fw = new FileWriter(file.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fw);
         AtomicBoolean isFinish = new AtomicBoolean(false);
-        ArrayList<String> productDetailsList = new ArrayList<>();
+        Gson gson = new Gson();
         try {
             if(!file.exists()){
                 file.createNewFile();
@@ -42,8 +44,19 @@ public class GetInformationInTheLink {
                         if(splited[1].startsWith(" ")){
 
                         }else{
-                            System.out.println("Boşluk yok");
+                            JSONObject jsonObject = new JSONObject(splited[1].trim().split("=" , 2)[1].split("window\\.TYPageName=")[0]);
+                            Type type = new TypeToken<TrendyolModel>(){}.getType();
+                            TrendyolModel trendyolModels = gson.fromJson(String.valueOf(jsonObject), type);
+                            trendyolModels.product.variants.forEach(variants -> {
+                                System.out.println(variants.barcode);
+                            });
+
+
+
+
+                            //System.out.println(s);
                         }
+                        //System.out.println(splited[1]);
                     }
                 });
             });
