@@ -1,5 +1,6 @@
 package GetLinkPackaces;
 
+import Model.Product;
 import Model.TrendyolModel;
 import Util.UJsoup;
 import com.google.gson.Gson;
@@ -47,10 +48,10 @@ public class GetInformationInTheLink {
                             JSONObject jsonObject = new JSONObject(splited[1].trim().split("=" , 2)[1].split("window\\.TYPageName=")[0]);
                             Type type = new TypeToken<TrendyolModel>(){}.getType();
                             TrendyolModel trendyolModels = gson.fromJson(String.valueOf(jsonObject), type);
-                            trendyolModels.product.variants.forEach(variants -> {
-                                System.out.println(variants.barcode);
-                            });
-
+                            Product trendyolProductDetail = trendyolModels.product;
+                            System.out.println(trendyolProductDetail.businessUnit);
+                            System.out.println(trendyolProductDetail.ratingScore.averageRating);
+                            System.out.println(trendyolProductDetail.price.originalPrice.text+": "+trendyolProductDetail.price.originalPrice.value);
 
 
 

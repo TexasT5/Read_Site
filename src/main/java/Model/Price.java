@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Price{
     @SerializedName("sellingPrice")
-    DefaultPrice sellingPrice;
+    public DefaultPrice sellingPrice;
     @SerializedName("discountedPrice")
-    DefaultPrice discountedPrice;
+    public DefaultPrice discountedPrice;
     @SerializedName("originalPrice")
-    DefaultPrice originalPrice;
+    public DefaultPrice originalPrice;
 }

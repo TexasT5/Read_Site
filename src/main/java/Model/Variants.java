@@ -7,44 +7,44 @@ import java.util.List;
 
 public class Variants {
     @SerializedName("fulfilmentType")
-    String fulfilmentType;
+    public String fulfilmentType;
     @SerializedName("itemNumber")
-    int itemNumber;
+    public int itemNumber;
     @SerializedName("attributeValue")
-    String attributeValue;
+    public String attributeValue;
     @SerializedName("rushDeliveryMerchantListingExist")
-    boolean rushDeliveryMerchantListingExist;
+    public boolean rushDeliveryMerchantListingExist;
     @SerializedName("fastDeliveryOptions")
-    List<Object> fastDeliveryOptions;
+    public List<Object> fastDeliveryOptions;
     @SerializedName("listingId")
-    String listingId;
+    public String listingId;
     @SerializedName("sellable")
-    boolean sellable;
+    public boolean sellable;
     @SerializedName("attributeId")
-    int attributeId;
+    public int attributeId;
     @SerializedName("isWinner")
-    boolean isWinner;
+    public boolean isWinner;
     @SerializedName("attributeType")
-    String attributeType;
+    public String attributeType;
     @SerializedName("lowerPriceMerchantListingExist")
-    boolean lowerPriceMerchantListingExist;
+    public boolean lowerPriceMerchantListingExist;
     @SerializedName("hasCollectable")
-    boolean hasCollectable;
+    public boolean hasCollectable;
     @SerializedName("attributeName")
-    String attributeName;
+    public String attributeName;
     @SerializedName("attributeBeautifiedValue")
-    String attributeBeautifiedValue;
+    public String attributeBeautifiedValue;
     @SerializedName("unitInfo")
-    UnitInfo unitInfo;
+    public UnitInfo unitInfo;
     @SerializedName("stock")
-    Object stock;
+    public Object stock;
     @SerializedName("stamps")
-    List<Stamps> stamps;
+    public List<Stamps> stamps;
     @SerializedName("barcode")
     public String barcode;
     @SerializedName("discountedPriceInfo")
-    String discountedPriceInfo;
+    public String discountedPriceInfo;
     @SerializedName("availableForClaim")
-    boolean availableForClaim;
+    public boolean availableForClaim;
 
 }
