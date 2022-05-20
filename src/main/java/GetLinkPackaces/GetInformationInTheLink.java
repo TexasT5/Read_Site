@@ -1,5 +1,6 @@
 package GetLinkPackaces;
 
+import Model.Trendyol.Product;
 import Model.Trendyol.TrendyolModel;
 import Util.UJsoup;
 import com.google.gson.Gson;
@@ -46,22 +47,22 @@ public class GetInformationInTheLink {
                             JSONObject jsonObject = new JSONObject(splited[1].trim().split("=" , 2)[1].split("window\\.TYPageName=")[0]);
                             Type type = new TypeToken<TrendyolModel>(){}.getType();
                             TrendyolModel trendyolModels = gson.fromJson(String.valueOf(jsonObject), type);
-                            trendyolModels.product.variants.forEach(variants -> {
-                                //System.out.println(variants.barcode);
+                            Product product = trendyolModels.product;
+                            //System.out.println("BusinessUnit : "+product.businessUnit);
+                            //System.out.println("OriginalPrice : "+product.price.originalPrice.text);
+                            //System.out.println("Barcode : "+product.variants.get(0).barcode);
+                            product.attributes.forEach(attributes -> {
+                                //System.out.println(attributes.key.name+":"+attributes.value.name);
                             });
-                            //System.out.println(trendyolModels.product.businessUnit);
-                            //System.out.println(trendyolModels.product.productCode);
-                            //System.out.println(trendyolModels.product.name);
-                            trendyolModels.product.images.forEach(s -> {
-                                //System.out.println("https://cdn.dsmcdn.com/"+s);
-                            });
+                            System.out.println();
+
                         }
                     }
                 });
             });
-            elements.select(".container").forEach(element -> {
-                System.out.println(element.select(".product-desc").html());
-            });
+
+            Elements elements1 = new UJsoup().getDiv(links).getElementsByTag("body");
+            System.out.println(elements1.select("#container > div > #product-detail-app > .product-detail-container > .details-section > .info-wrapper").html());
 
             if(isFinish.get()){
                 bw.close();
