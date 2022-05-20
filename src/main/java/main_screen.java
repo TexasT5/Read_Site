@@ -22,7 +22,6 @@ public class main_screen extends JFrame{
 
     public main_screen(){
         GetLinks getLinks = new GetLinks();
-        ArrayList<String> checkCertificate = new ArrayList<>(Arrays.asList("https://" , "http://"));
         String[] defaultComboBoxList = {"Trendyol"};
         DefaultComboBoxModel<String> comboBoxList = new DefaultComboBoxModel<String>(defaultComboBoxList);
 

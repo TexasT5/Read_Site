@@ -1,4 +1,4 @@
-package Model;
+package Model.Trendyol;
 
 public class Category {
     String beautifiedName;

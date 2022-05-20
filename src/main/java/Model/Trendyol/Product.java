@@ -1,4 +1,4 @@
-package Model;
+package Model.Trendyol;
 
 import com.google.gson.annotations.SerializedName;
 

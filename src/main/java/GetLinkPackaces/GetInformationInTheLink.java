@@ -1,7 +1,6 @@
 package GetLinkPackaces;
 
-import Model.Product;
-import Model.TrendyolModel;
+import Model.Trendyol.TrendyolModel;
 import Util.UJsoup;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -13,7 +12,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -48,18 +46,21 @@ public class GetInformationInTheLink {
                             JSONObject jsonObject = new JSONObject(splited[1].trim().split("=" , 2)[1].split("window\\.TYPageName=")[0]);
                             Type type = new TypeToken<TrendyolModel>(){}.getType();
                             TrendyolModel trendyolModels = gson.fromJson(String.valueOf(jsonObject), type);
-                            Product trendyolProductDetail = trendyolModels.product;
-                            System.out.println(trendyolProductDetail.businessUnit);
-                            System.out.println(trendyolProductDetail.ratingScore.averageRating);
-                            System.out.println(trendyolProductDetail.price.originalPrice.text+": "+trendyolProductDetail.price.originalPrice.value);
-
-
-
-                            //System.out.println(s);
+                            trendyolModels.product.variants.forEach(variants -> {
+                                //System.out.println(variants.barcode);
+                            });
+                            //System.out.println(trendyolModels.product.businessUnit);
+                            //System.out.println(trendyolModels.product.productCode);
+                            //System.out.println(trendyolModels.product.name);
+                            trendyolModels.product.images.forEach(s -> {
+                                //System.out.println("https://cdn.dsmcdn.com/"+s);
+                            });
                         }
-                        //System.out.println(splited[1]);
                     }
                 });
+            });
+            elements.select(".container").forEach(element -> {
+                System.out.println(element.select(".product-desc").html());
             });
 
             if(isFinish.get()){

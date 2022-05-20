@@ -1,6 +1,6 @@
-package Model;
+package Model.Trendyol;
 
-public class Key {
+public class Value {
     public String name;
     public long id;
 }

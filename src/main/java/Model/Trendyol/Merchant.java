@@ -1,4 +1,4 @@
-package Model;
+package Model.Trendyol;
 
 import java.util.List;
 
