@@ -1,10 +1,10 @@
 package Model.Trendyol;
 
 public class AllVariants {
-    int itemNumber;
-    double price;
-    boolean inStock;
-    String currency;
-    String value;
-    String barcode;
+    public int itemNumber;
+    public double price;
+    public boolean inStock;
+    public String currency;
+    public String value;
+    public String barcode;
 }

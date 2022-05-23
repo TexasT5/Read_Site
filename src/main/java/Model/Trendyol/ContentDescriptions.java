@@ -1,6 +1,6 @@
 package Model.Trendyol;
 
 public class ContentDescriptions {
-    String description;
-    boolean bold;
+    public String description;
+    public boolean bold;
 }
