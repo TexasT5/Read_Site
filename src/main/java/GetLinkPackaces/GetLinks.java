@@ -3,25 +3,23 @@ package GetLinkPackaces;
 import Util.UJsoup;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GetLinks {
     GetInformationInTheLink getInformationInTheLink = new GetInformationInTheLink();
-
-    public void getLinkInSites(String siteName, String enterBrand, DefaultListModel<String> listModel, JScrollPane main_scroll_pane){
-
+    public void getLinkInSites(String siteName, String enterBrand, DefaultListModel<String> listModel, JScrollPane main_scroll_pane , JFileChooser getSelectFile){
         switch (siteName){
             case "Trendyol":
-                getTrendyolProductLinks(enterBrand , listModel, main_scroll_pane);
+                getTrendyolProductLinks(enterBrand , listModel, main_scroll_pane , getSelectFile);
             break;
 
             default:break;
         }
     }
 
-    private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane){
-
+    private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane , JFileChooser getSelectedFile){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -45,7 +43,7 @@ public class GetLinks {
                                             }
                                             listModel.addElement("https://www.trendyol.com"+getHref);
                                             try {
-                                                getInformationInTheLink.getInformationInTheLink("https://www.trendyol.com"+getHref , "Trendyol");
+                                                getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com"+getHref , getSelectedFile);
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             }

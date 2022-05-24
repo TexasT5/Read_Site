@@ -1,7 +1,9 @@
 import GetLinkPackaces.GetLinks;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import org.jsoup.Jsoup;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class main_screen extends JFrame{
     private JList<String> list1;
     private JComboBox comboBox1;
     private JScrollPane main_scroll_pane;
+    private JFileChooser jFileChooser;
 
     public main_screen(){
         GetLinks getLinks = new GetLinks();
@@ -47,7 +50,15 @@ public class main_screen extends JFrame{
                     errorMessageManagement("Marka girilmedi" ,  true);
                 }else{
                     errorMessageLabel.setVisible(false);
-                    getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane);
+                    jFileChooser = new JFileChooser();
+                    jFileChooser.setCurrentDirectory(new java.io.File("."));
+                    jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    jFileChooser.setAcceptAllFileFilterUsed(false);
+                    if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        if(!jFileChooser.getSelectedFile().isFile()){
+                            getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser);
+                        }
+                    }
                 }
             }
         });

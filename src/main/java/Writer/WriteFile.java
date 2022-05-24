@@ -3,6 +3,7 @@ package Writer;
 import Model.Trendyol.Product;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,13 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class WriteFile {
 
-    public void writeAFile(Product product){
+    public void writeAFile(Product product , JFileChooser getSelectedFile){
         try{
-            File file = new File("/Volumes/HDD/IdeaProjects/Read_Site/"+product.name);
+            File file = new File(getSelectedFile.getSelectedFile()+"\\"+product.name);
             if(!file.exists()) {
                 file.mkdirs();
-            }else{
-                System.out.println("Dosya var");
             }
             getImageFromURL(product.images , file);
             writeFileInDirectory(file , product);
@@ -67,10 +66,7 @@ public class WriteFile {
                     e.printStackTrace();
                 }
             });
-
             fileWriter.close();
-
-
         }catch (Exception e){
             e.printStackTrace();
         }
