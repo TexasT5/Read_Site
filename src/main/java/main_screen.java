@@ -41,7 +41,6 @@ public class main_screen extends JFrame{
         JScrollBar jScrollPane =  main_scroll_pane.getVerticalScrollBar();
         jScrollPane.setValue(jScrollPane.getMaximum());
 
-
         clickButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -51,6 +50,7 @@ public class main_screen extends JFrame{
                 }else{
                     errorMessageLabel.setVisible(false);
                     jFileChooser = new JFileChooser();
+                    jFileChooser.setDialogTitle("Select File");
                     jFileChooser.setCurrentDirectory(new java.io.File("."));
                     jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     jFileChooser.setAcceptAllFileFilterUsed(false);

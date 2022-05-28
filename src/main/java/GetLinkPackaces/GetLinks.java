@@ -20,10 +20,10 @@ public class GetLinks {
     }
 
     private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane , JFileChooser getSelectedFile){
+        AtomicBoolean threadEnding = new AtomicBoolean(true);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                AtomicBoolean threadEnding = new AtomicBoolean(true);
                 int i = 1;
                 while(threadEnding.get()){
                     try{
@@ -36,6 +36,7 @@ public class GetLinks {
                                         threadEnding.set(false);
                                     }else{
                                         if(getBrandSplit[0].equals("/")){
+                                            System.out.println("çalışıyor");
                                             try {
                                                 Thread.sleep(1000);
                                             } catch (InterruptedException e) {
@@ -60,6 +61,7 @@ public class GetLinks {
             }
         });
         thread.start();
+        System.out.println(thread.isAlive());
     }
 
 

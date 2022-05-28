@@ -1,6 +1,5 @@
 package Writer;
 
-import Model.Trendyol.AllVariants;
 import Model.Trendyol.Product;
 
 import javax.imageio.ImageIO;
@@ -8,20 +7,15 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
 
 public class WriteFile {
     public void writeAFile(Product product , JFileChooser getSelectedFile){
@@ -36,7 +30,6 @@ public class WriteFile {
             e.printStackTrace();
         }
     }
-
     private void getImageFromURL(List<String> getImage , File file) throws InterruptedException {
         AtomicInteger count = new AtomicInteger();
         getImage.forEach(s -> {
@@ -49,34 +42,12 @@ public class WriteFile {
             }
         });
     }
-
     private void writeFileInDirectory(File file , Product product) throws InterruptedException {
-        int count = 3;
-
-        AtomicReference<String> contentDescriptionCombine = new AtomicReference<>();
-        product.contentDescriptions.forEach(contentDescriptions -> {
-            contentDescriptionCombine.set(contentDescriptions.description);
-        });
-
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
         if(product.allVariants.get(0).value.equals("") || product.allVariants.get(0).value == null){
-            productDetail.put("1",new Object[] { "Ürün adı", "Ürün Kodu", "Ürün Barkodu" , "Fiyat" , "Renk" , "Ürün Açıklaması"});
-            productDetail.put("2",new Object[] { product.name , product.productCode , product.variants.get(0).barcode , product.price.originalPrice.text , product.color,String.valueOf(contentDescriptionCombine)});
+           productDetail = smallWriteExcelFileAMap(product);
         }else{
-            boolean isFinish = false;
-            System.out.println("Bitti mi ? ;" + isFinish);
-            productDetail.put("1",new Object[] { "Ürün adı", "Ürün Kodu", "Ürün Barkodu" , "Fiyat" , "Renk" , "Beden" , "Beden barkod" , "Beden ürün kodu" , "Beden fiyatı" , "Ürün Açıklaması"});
-            productDetail.put("2",new Object[] { product.name , product.productCode , product.variants.get(0).barcode , product.price.originalPrice.text , product.color, product.allVariants.get(0).value , String.valueOf(product.allVariants.get(0).barcode) , String.valueOf(product.allVariants.get(0).itemNumber) , String.valueOf(product.allVariants.get(0).price) ,String.valueOf(contentDescriptionCombine)});
-
-            int getListSize = product.allVariants.size();
-
-            for(int i = 1; i <= product.allVariants.size(); i++) {
-                productDetail.put(String.valueOf(count) , new Object[]{"" , "" , "" , "" ,"" , product.allVariants.get(i).value , product.allVariants.get(i).barcode.toString() , String.valueOf(product.allVariants.get(i).itemNumber) , String.valueOf(product.allVariants.get(i).price)});
-                count++;
-                System.out.println("Get i : " + i + "get allvariants size : "+ product.allVariants.size());
-            }
-
-            System.out.println("Bitti mi ? ;" + isFinish);
+            productDetail = largeWriteExcelFileAMap(product);
         }
         writeExcelFile(file , product , productDetail);
     }
@@ -105,4 +76,87 @@ public class WriteFile {
             e.printStackTrace();
         }
     }
+    private Map<String , Object[]> smallWriteExcelFileAMap(Product product) throws InterruptedException {
+        int count = 3;
+        AtomicReference<String> contentDescriptionCombine = new AtomicReference<>();
+        product.contentDescriptions.forEach(contentDescriptions -> {
+            contentDescriptionCombine.set(contentDescriptions.description);
+        });
+        Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
+        productDetail.put("1",new Object[] { "Ürün adı", "Ürün Kodu", "Ürün Barkodu" , "Fiyat" , "Renk" , "Ürün Açıklaması" , "" ,"Öznitellikler"});
+        productDetail.put("2",new Object[] { product.name , product.productCode , product.variants.get(0).barcode , product.price.originalPrice.text , product.color, String.valueOf(contentDescriptionCombine) , "" , product.attributes.get(0).key.name , product.attributes.get(0).value.name});
+        Thread.sleep(1000);
+        for (int i = 1; i < product.attributes.size(); i++) {
+            productDetail.put(String.valueOf(count), new Object[]{"", "", "", "", "", "", "", product.attributes.get(i).key.name, product.attributes.get(i).value.name});
+            count++;
+        }
+        return productDetail;
+    }
+    private Map<String , Object[]> largeWriteExcelFileAMap(Product product) throws InterruptedException {
+        int count = 3;
+        Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
+        productDetail.put("1",new Object[] {
+                "Ürün adı",
+                "Ürün Kodu",
+                "Ürün Barkodu" ,
+                "Fiyat" ,
+                "Renk" ,
+                "Beden" ,
+                "Beden barkod" ,
+                "Beden ürün kodu" ,
+                "Beden fiyatı" ,
+                "Stok durumu",
+                "Ürün Açıklaması" ,
+                "" ,
+                "Öznitellikler"});
+
+        productDetail.put("2",new Object[] {
+                product.name ,
+                product.productCode ,
+                product.variants.get(0).barcode ,
+                product.price.originalPrice.text ,
+                product.color,
+                product.allVariants.get(0).value ,
+                String.valueOf(product.allVariants.get(0).barcode) ,
+                String.valueOf(product.allVariants.get(0).itemNumber) ,
+                String.valueOf(product.allVariants.get(0).price) ,
+                String.valueOf(product.allVariants.get(0).inStock),
+                String.valueOf(product.contentDescriptions.get(0).description),
+                "",
+                product.attributes.get(0).key.name ,
+                product.attributes.get(0).value.name});
+
+        int whichSizeBig = 0;
+        if(product.allVariants.size() > product.attributes.size()){
+            whichSizeBig = product.allVariants.size();
+        }else{
+            whichSizeBig = product.attributes.size();
+        }
+
+
+        putOnMap(3 ,new Object[]{"sa" , "sa" ,"sa" , "sa"} , productDetail);
+
+        System.out.println(productDetail.get(3));
+
+        writeExcelFileAllVariantsAndAttributes(product);
+        return productDetail;
+    }
+   /* private<T> Object[] autoLoop(List<T> productList){
+        int count = 3;
+        Object[] t = {};
+        for(int i = 1; i < productList.size(); i++){
+            t = new Object[]{count++, productList.get(i)};
+        }
+        return t;
+    }
+    */
+
+    private void writeExcelFileAllVariantsAndAttributes(Product product){
+        Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
+    }
+
+    private Object[] putOnMap(int size , Object[] variable , Map<String , Object[]> getMap){
+        return getMap.put(String.valueOf(size) , new Object[]{variable});
+    }
+
 }
