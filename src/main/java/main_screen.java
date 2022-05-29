@@ -73,4 +73,7 @@ public class main_screen extends JFrame{
         }
     }
 
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
 }
