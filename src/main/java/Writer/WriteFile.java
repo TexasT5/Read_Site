@@ -1,5 +1,8 @@
 package Writer;
 
+import Model.Trendyol.AllVariants;
+import Model.Trendyol.Attributes;
+import Model.Trendyol.ContentDescriptions;
 import Model.Trendyol.Product;
 
 import javax.imageio.ImageIO;
@@ -7,15 +10,19 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.impl.xb.xsdschema.All;
 
 public class WriteFile {
     public void writeAFile(Product product , JFileChooser getSelectedFile){
@@ -114,7 +121,7 @@ public class WriteFile {
                 product.name ,
                 product.productCode ,
                 product.variants.get(0).barcode ,
-                product.price.originalPrice.text ,
+                product.price.sellingPrice.text ,
                 product.color,
                 product.allVariants.get(0).value ,
                 String.valueOf(product.allVariants.get(0).barcode) ,
@@ -126,37 +133,48 @@ public class WriteFile {
                 product.attributes.get(0).key.name ,
                 product.attributes.get(0).value.name});
 
-        int whichSizeBig = 0;
-        if(product.allVariants.size() > product.attributes.size()){
-            whichSizeBig = product.allVariants.size();
+        int whichListBig = 0;
+        if(product.allVariants.size() > product.attributes.size() && product.allVariants.size() > product.contentDescriptions.size()){
+            System.out.println("All variants daha büyük");
+            whichListBig = product.allVariants.size();
+        }else if(product.attributes.size() > product.allVariants.size() && product.attributes.size() > product.contentDescriptions.size()){
+            System.out.println("Attributes daha büyük");
+            whichListBig = product.attributes.size();
         }else{
-            whichSizeBig = product.attributes.size();
+            whichListBig = product.contentDescriptions.size();
+            System.out.println("Content description daha büyük");
         }
 
 
-        putOnMap(3 ,new Object[]{"sa" , "sa" ,"sa" , "sa"} , productDetail);
+        for (int j = 1; j <= whichListBig; j++) {
+            String value = "";
+            String price = "";
+            String inStock = "";
+            String barcode = "";
+            String itemNumber = "";
 
-        System.out.println(productDetail.get(3));
+            String keyName = "";
+            String valueName = "";
 
-        writeExcelFileAllVariantsAndAttributes(product);
+            String contentDescription = "";
+            if(j < product.allVariants.size() ){
+                Thread.sleep(1000);
+                value = String.valueOf(product.allVariants.get(j).value);
+                price = String.valueOf(product.allVariants.get(j).price);
+                inStock = String.valueOf(product.allVariants.get(j).inStock);
+                barcode = String.valueOf(product.allVariants.get(j).barcode);
+                itemNumber = String.valueOf(product.allVariants.get(j).itemNumber);
+            }
+            if(j < product.attributes.size()){
+                keyName = product.attributes.get(j).key.name;
+                valueName = product.attributes.get(j).value.name;
+            }
+            if(j < product.contentDescriptions.size()){
+                contentDescription = product.contentDescriptions.get(j).description;
+            }
+            productDetail.put(String.valueOf(count) , new Object[]{"","","","","", value , barcode , itemNumber , price, inStock  , contentDescription , "" , keyName , valueName});
+            count++;
+        }
         return productDetail;
     }
-   /* private<T> Object[] autoLoop(List<T> productList){
-        int count = 3;
-        Object[] t = {};
-        for(int i = 1; i < productList.size(); i++){
-            t = new Object[]{count++, productList.get(i)};
-        }
-        return t;
-    }
-    */
-
-    private void writeExcelFileAllVariantsAndAttributes(Product product){
-        Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
-    }
-
-    private Object[] putOnMap(int size , Object[] variable , Map<String , Object[]> getMap){
-        return getMap.put(String.valueOf(size) , new Object[]{variable});
-    }
-
 }
