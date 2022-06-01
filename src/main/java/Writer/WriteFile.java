@@ -10,28 +10,37 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
 
 public class WriteFile {
     public void writeAFile(Product product , JFileChooser getSelectedFile){
         try{
-            File file = new File(getSelectedFile.getSelectedFile()+"\\"+product.nameWithProductCode);
+            String fileName = "";
+            String regex = ":+/";
+
+            String[] strings = product.name.split("");
+            for (String s : strings){
+                System.out.println(Pattern.matches(regex ,s));
+            }
+
+
+
+            File file = new File(getSelectedFile.getSelectedFile()+"\\"+"");
+
             if(!file.exists()) {
                 file.mkdirs();
             }
-            getImageFromURL(product.images , file);;
+            getImageFromURL(product.images , file);
             writeFileInDirectory(file , product);
         }catch (Exception e){
             e.printStackTrace();
@@ -145,36 +154,37 @@ public class WriteFile {
             System.out.println("Content description daha büyük");
         }
 
-
-        for (int j = 1; j <= whichListBig; j++) {
-            String value = "";
-            String price = "";
-            String inStock = "";
-            String barcode = "";
-            String itemNumber = "";
-
-            String keyName = "";
-            String valueName = "";
-
-            String contentDescription = "";
-            if(j < product.allVariants.size() ){
-                Thread.sleep(1000);
-                value = String.valueOf(product.allVariants.get(j).value);
-                price = String.valueOf(product.allVariants.get(j).price);
-                inStock = String.valueOf(product.allVariants.get(j).inStock);
-                barcode = String.valueOf(product.allVariants.get(j).barcode);
-                itemNumber = String.valueOf(product.allVariants.get(j).itemNumber);
-            }
-            if(j < product.attributes.size()){
-                keyName = product.attributes.get(j).key.name;
-                valueName = product.attributes.get(j).value.name;
-            }
-            if(j < product.contentDescriptions.size()){
-                contentDescription = product.contentDescriptions.get(j).description;
-            }
-            productDetail.put(String.valueOf(count) , new Object[]{"","","","","", value , barcode , itemNumber , price, inStock  , contentDescription , "" , keyName , valueName});
+        for (int i = 1; i <= whichListBig; i++) {
+            productDetail.put(String.valueOf(count) , writeExcelFileProductDetail(product.allVariants , product.attributes , product.contentDescriptions , i));
             count++;
         }
         return productDetail;
+    }
+    private Object[] writeExcelFileProductDetail(List<AllVariants> getAllVariants , List<Attributes> attributesList , List<ContentDescriptions> getContentDescription , int whichSizeBig){
+        String value = "";
+        String price = "";
+        String inStock = "";
+        String barcode = "";
+        String itemNumber = "";
+
+        String keyName = "";
+        String valueName = "";
+
+        String contentDescription = "";
+        if(whichSizeBig < getAllVariants.size() ){
+            value = String.valueOf(getAllVariants.get(whichSizeBig).value);
+            price = String.valueOf(getAllVariants.get(whichSizeBig).price);
+            inStock = String.valueOf(getAllVariants.get(whichSizeBig).inStock);
+            barcode = String.valueOf(getAllVariants.get(whichSizeBig).barcode);
+            itemNumber = String.valueOf(getAllVariants.get(whichSizeBig).itemNumber);
+        }
+        if(whichSizeBig < attributesList.size()){
+            keyName = attributesList.get(whichSizeBig).key.name;
+            valueName = attributesList.get(whichSizeBig).value.name;
+        }
+        if(whichSizeBig < getContentDescription.size()){
+            contentDescription = getContentDescription.get(whichSizeBig).description;
+        }
+        return new Object[]{"","","","","", String.valueOf(value) , String.valueOf(barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , "" , String.valueOf(keyName) , String.valueOf(valueName)};
     }
 }
