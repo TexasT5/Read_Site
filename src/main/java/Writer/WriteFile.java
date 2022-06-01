@@ -26,16 +26,9 @@ public class WriteFile {
     public void writeAFile(Product product , JFileChooser getSelectedFile){
         try{
             String fileName = "";
-            String regex = ":+/";
-
-            String[] strings = product.name.split("");
-            for (String s : strings){
-                System.out.println(Pattern.matches(regex ,s));
-            }
-
-
-
-            File file = new File(getSelectedFile.getSelectedFile()+"\\"+"");
+            String regex = ":+|/+|\"+|<+|>+|\\*+";
+            fileName = product.name.replaceAll(regex , "").trim();
+            File file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
 
             if(!file.exists()) {
                 file.mkdirs();
@@ -69,7 +62,7 @@ public class WriteFile {
     }
     private void writeExcelFile(File file , Product product , Map<String , Object[]> map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet spreadsheet = workbook.createSheet(product.name);
+        XSSFSheet spreadsheet = workbook.createSheet(product.productCode);
         XSSFRow row;
         File getDirectory = new File(file , "productDetail.xlsx");
 
