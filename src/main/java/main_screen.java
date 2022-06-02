@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class main_screen extends JFrame{
     public JPanel main_panel;
@@ -24,6 +26,7 @@ public class main_screen extends JFrame{
     private JFileChooser jFileChooser;
 
     public main_screen(){
+        Pattern pattern = Pattern.compile("[A-Za-z]");
         GetLinks getLinks = new GetLinks();
         String[] defaultComboBoxList = {"Trendyol"};
         DefaultComboBoxModel<String> comboBoxList = new DefaultComboBoxModel<String>(defaultComboBoxList);
@@ -45,9 +48,15 @@ public class main_screen extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 String enterUrlGetText = enterURLTextField.getText();
+                Matcher matcher = pattern.matcher(enterUrlGetText);
+                System.out.println("MatherStatus : "+matcher.find());
+
+
                 if(enterUrlGetText.equals("")){
                     errorMessageManagement("Marka girilmedi" ,  true);
-                }else{
+                }else if(!matcher.find()){
+                    errorMessageManagement("Yalnızca [A-Z] [a-z] girişi yapılabilir", true);
+                } else{
                     errorMessageLabel.setVisible(false);
                     jFileChooser = new JFileChooser();
                     jFileChooser.setDialogTitle("Select File");
@@ -71,9 +80,5 @@ public class main_screen extends JFrame{
         }else{
             errorMessageLabel.setVisible(visibility);
         }
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
     }
 }
