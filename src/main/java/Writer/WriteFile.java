@@ -1,9 +1,6 @@
 package Writer;
 
-import Model.Trendyol.AllVariants;
-import Model.Trendyol.Attributes;
-import Model.Trendyol.ContentDescriptions;
-import Model.Trendyol.Product;
+import Model.Trendyol.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -14,8 +11,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -86,17 +81,45 @@ public class WriteFile {
         }
     }
     private Map<String , Object[]> smallWriteExcelFileAMap(Product product) throws InterruptedException {
-        int count = 3;
-        AtomicReference<String> contentDescriptionCombine = new AtomicReference<>();
-        product.contentDescriptions.forEach(contentDescriptions -> {
-            contentDescriptionCombine.set(contentDescriptions.description);
-        });
+        int count = 2;
+        int totalVariable = product.allVariants.size() + product.variants.size() + product.contentDescriptions.size();
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
-        productDetail.put("1",new Object[] { "Ürün adı", "Ürün Kodu", "Ürün Barkodu" , "Fiyat" , "Renk" , "Ürün Açıklaması" , "" ,"Öznitellikler"});
-        productDetail.put("2",new Object[] { product.name , product.productCode , product.variants.get(0).barcode , product.price.originalPrice.text , product.color, String.valueOf(contentDescriptionCombine) , "" , product.attributes.get(0).key.name , product.attributes.get(0).value.name});
+
+        productDetail.put("1",new Object[] { "Product name", "Product Code", "Product Barcode" , "Selling Price" , "Discounted Price" , "Original Price" , "Color" , "Product Description" , "" ,"Attributes" , "Original Categories"});
         Thread.sleep(1000);
-        for (int i = 1; i < product.attributes.size(); i++) {
-            productDetail.put(String.valueOf(count), new Object[]{"", "", "", "", "", "", "", product.attributes.get(i).key.name, product.attributes.get(i).value.name});
+        for (int i = 0; i < totalVariable; i++) {
+            String name = null;
+            String productCode = null;
+            String productBarcode = null;
+            String sellingPrice = null;
+            String discountedPrice = null;
+            String originalPrice = null;
+            String color = null;
+            String keyValue = null;
+            String valueName = null;
+            String contentDescriptionCombine = null;
+            String originalCategories = null;
+            if(i <= 0){
+                name = product.name;
+                productCode = product.productCode;
+                sellingPrice = product.price.sellingPrice.text.toString();
+                discountedPrice = product.price.discountedPrice.text.toString();
+                originalPrice = product.price.originalPrice.text.toString();
+                color = product.color;
+                originalCategories = product.originalCategory.hierarchy;
+            }
+
+            if(i < product.attributes.size()){
+                keyValue = product.attributes.get(i).key.getName();
+                valueName = product.attributes.get(i).value.name;
+            }
+            if(i < product.variants.size()){
+                productBarcode = product.variants.get(i).barcode;
+            }
+            if(i < product.contentDescriptions.size()){
+                contentDescriptionCombine = product.contentDescriptions.get(i).description;
+            }
+            productDetail.put(String.valueOf(count), new Object[]{checkNullVariable(name), checkNullVariable(productCode), checkNullVariable(productBarcode), checkNullVariable(sellingPrice),checkNullVariable(discountedPrice) , checkNullVariable(originalPrice) , checkNullVariable(color), checkNullVariable(contentDescriptionCombine), "", checkNullVariable(keyValue), checkNullVariable(valueName) , checkNullVariable(originalCategories)});
             count++;
         }
         return productDetail;
@@ -105,35 +128,35 @@ public class WriteFile {
         int count = 3;
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
         productDetail.put("1",new Object[] {
-                "Ürün adı",
-                "Ürün Kodu",
-                "Ürün Barkodu" ,
-                "Fiyat" ,
-                "Renk" ,
-                "Beden" ,
-                "Beden barkod" ,
-                "Beden ürün kodu" ,
-                "Beden fiyatı" ,
-                "Stok durumu",
-                "Ürün Açıklaması" ,
+                "Product Name",
+                "Product Code",
+                "Product Barcode" ,
+                "Selling Price" , "Discounted Price" , "Original Price",
+                "Color" ,
+                "Body" ,
+                "Body Barcode" ,
+                "Body Product Code" ,
+                "Body Price" ,
+                "Stock Status",
+                "Product Description" ,
                 "" ,
-                "Öznitellikler"});
+                "Attributes"});
 
         productDetail.put("2",new Object[] {
-                product.name ,
-                product.productCode ,
-                product.variants.get(0).barcode ,
-                product.price.sellingPrice.text ,
-                product.color,
-                product.allVariants.get(0).value ,
-                String.valueOf(product.allVariants.get(0).barcode) ,
-                String.valueOf(product.allVariants.get(0).itemNumber) ,
-                String.valueOf(product.allVariants.get(0).price) ,
-                String.valueOf(product.allVariants.get(0).inStock),
-                String.valueOf(product.contentDescriptions.get(0).description),
+                checkNullVariable(product.name),
+                checkNullVariable(product.productCode) ,
+                checkNullVariable(product.variants.get(0).barcode ),
+                checkNullVariable(product.price.sellingPrice.text) ,
+                checkNullVariable(product.color),
+                checkNullVariable(product.allVariants.get(0).value) ,
+                checkNullVariable(String.valueOf(product.allVariants.get(0).barcode)) ,
+                checkNullVariable(String.valueOf(product.allVariants.get(0).itemNumber)) ,
+                checkNullVariable(String.valueOf(product.allVariants.get(0).price)) ,
+                checkNullVariable(String.valueOf(product.allVariants.get(0).inStock)),
+                checkNullVariable(String.valueOf(product.contentDescriptions.get(0).description)),
                 "",
-                product.attributes.get(0).key.name ,
-                product.attributes.get(0).value.name});
+                checkNullVariable(product.attributes.get(0).key.name) ,
+                checkNullVariable(product.attributes.get(0).value.name)});
 
         int whichListBig = 0;
         if(product.allVariants.size() > product.attributes.size() && product.allVariants.size() > product.contentDescriptions.size()){
@@ -165,19 +188,30 @@ public class WriteFile {
 
         String contentDescription = "";
         if(whichSizeBig < getAllVariants.size() ){
-            value = String.valueOf(getAllVariants.get(whichSizeBig).value);
-            price = String.valueOf(getAllVariants.get(whichSizeBig).price);
-            inStock = String.valueOf(getAllVariants.get(whichSizeBig).inStock);
-            barcode = String.valueOf(getAllVariants.get(whichSizeBig).barcode);
-            itemNumber = String.valueOf(getAllVariants.get(whichSizeBig).itemNumber);
+            value = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).value));
+            price = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).price));
+            inStock = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).inStock));
+            barcode = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).barcode));
+            itemNumber = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).itemNumber));
         }
         if(whichSizeBig < attributesList.size()){
-            keyName = attributesList.get(whichSizeBig).key.name;
-            valueName = attributesList.get(whichSizeBig).value.name;
+            keyName = checkNullVariable(attributesList.get(whichSizeBig).key.name);
+            valueName = checkNullVariable(attributesList.get(whichSizeBig).value.name);
         }
         if(whichSizeBig < getContentDescription.size()){
-            contentDescription = getContentDescription.get(whichSizeBig).description;
+            contentDescription = checkNullVariable(getContentDescription.get(whichSizeBig).description);
         }
         return new Object[]{"","","","","", String.valueOf(value) , String.valueOf(barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , "" , String.valueOf(keyName) , String.valueOf(valueName)};
+    }
+    private String checkNullVariable(String getString){
+        String returnedSafeString = "";
+        if(getString == null){
+            returnedSafeString = "";
+        }else if(getString.equals("")){
+            returnedSafeString = "";
+        }else{
+            returnedSafeString = getString;
+        }
+        return returnedSafeString;
     }
 }

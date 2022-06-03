@@ -32,6 +32,11 @@ public class GetInformationInTheLink {
                         writeAFileFuncPushed(getSelectedFile , jsonObject);
                     }
                 });
+
+
+                element.getElementsByTag("a").forEach(element1 -> {
+                    System.out.println(element1.html());
+                });
             });
         } catch (IOException e) {
             e.printStackTrace();

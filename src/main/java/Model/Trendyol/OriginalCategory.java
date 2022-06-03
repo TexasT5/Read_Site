@@ -1,10 +1,10 @@
 package Model.Trendyol;
 
 public class OriginalCategory {
-    String beautifiedName;
-    String hierarchy;
-    String name;
-    boolean refundable;
-    int id;
-    boolean isVASEnabled;
+    public String beautifiedName;
+    public String hierarchy;
+    public String name;
+    public boolean refundable;
+    public int id;
+    public boolean isVASEnabled;
 }

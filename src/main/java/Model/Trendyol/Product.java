@@ -1,8 +1,11 @@
 package Model.Trendyol;
 
 import com.google.gson.annotations.SerializedName;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Product {
@@ -15,7 +18,7 @@ public class Product {
     @SerializedName("productGroupId")
     public int productGroupId;
     @SerializedName("variants")
-    public List<Variants> variants;
+    public List<Variants> variants = new ArrayList<Variants>(Arrays.asList(new Variants()));
     @SerializedName("ratingScore")
     public RatingScore ratingScore;
     @SerializedName("otherMerchantVariants")
@@ -40,8 +43,8 @@ public class Product {
     public String questionsUrl;
     public int tax;
     public List<ContentDescriptions> contentDescriptions;
-    public List<AllVariants> allVariants;
-    public String name;
+    public List<AllVariants> allVariants = new ArrayList<AllVariants>(Arrays.asList(new AllVariants(0 , 0.0 , false , "" , "","")));
+    public String name = "";
     public String uxLayout;
     public Campaign campaign;
     public OriginalCategory originalCategory;
