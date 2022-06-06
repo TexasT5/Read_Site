@@ -62,6 +62,12 @@
             <version>2.9.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>2.62.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>

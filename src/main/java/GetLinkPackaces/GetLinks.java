@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,12 +57,8 @@ public class GetLinks {
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                    listModel.addElement("https://www.trendyol.com/"+getHref);
-                                    try {
-                                        getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com/"+getHref , getSelectedFile);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
+                                    listModel.addElement("https://www.trendyol.com"+getHref);
+                                    getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com/"+getHref , getSelectedFile);
                                     JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
                                     scrollBar.setValue(scrollBar.getMaximum());
                                 }

@@ -23,7 +23,12 @@ public class WriteFile {
             String fileName = "";
             String regex = ":+|/+|\"+|<+|>+|\\*+";
             fileName = product.name.replaceAll(regex , "").trim();
-            File file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
+            File file = null;
+            if (System.getProperty("os.name").startsWith("Mac")){
+                file = new File(getSelectedFile.getSelectedFile()+"/"+fileName);
+            }else{
+                file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
+            }
 
             if(!file.exists()) {
                 file.mkdirs();
