@@ -1,6 +1,7 @@
 package GetLinkPackaces;
 
 import Util.UJsoup;
+import org.apache.commons.compress.utils.OsgiUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
@@ -51,17 +52,10 @@ public class GetLinks {
                             getLink.forEach(element -> {
                                 String getHref = element.attr("href");
                                 String[] getBrandSplit = getHref.split(getBrand);
-                                if(getBrandSplit[0].equals("/")){
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                    listModel.addElement("https://www.trendyol.com"+getHref);
-                                    getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com/"+getHref , getSelectedFile);
-                                    JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
-                                    scrollBar.setValue(scrollBar.getMaximum());
-                                }
+                                listModel.addElement("https://www.trendyol.com"+getHref);
+                                getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com"+getHref , getSelectedFile);
+                                JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
+                                scrollBar.setValue(scrollBar.getMaximum());
                             });
                         }
                         i++;

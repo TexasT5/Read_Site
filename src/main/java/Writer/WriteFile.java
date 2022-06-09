@@ -165,14 +165,11 @@ public class WriteFile {
 
         int whichListBig = 0;
         if(product.allVariants.size() > product.attributes.size() && product.allVariants.size() > product.contentDescriptions.size()){
-            System.out.println("All variants daha büyük");
             whichListBig = product.allVariants.size();
         }else if(product.attributes.size() > product.allVariants.size() && product.attributes.size() > product.contentDescriptions.size()){
-            System.out.println("Attributes daha büyük");
             whichListBig = product.attributes.size();
         }else{
             whichListBig = product.contentDescriptions.size();
-            System.out.println("Content description daha büyük");
         }
 
         for (int i = 1; i <= whichListBig; i++) {

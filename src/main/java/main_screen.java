@@ -49,9 +49,6 @@ public class main_screen extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 String enterUrlGetText = enterURLTextField.getText();
                 Matcher matcher = pattern.matcher(enterUrlGetText);
-                System.out.println("MatherStatus : "+matcher.find());
-
-
                 if(enterUrlGetText.equals("")){
                     errorMessageManagement("Marka girilmedi" ,  true);
                 }else if(!matcher.find()){
