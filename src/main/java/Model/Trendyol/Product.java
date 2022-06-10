@@ -43,7 +43,7 @@ public class Product {
     public String questionsUrl;
     public int tax;
     public List<ContentDescriptions> contentDescriptions;
-    public List<AllVariants> allVariants = new ArrayList<AllVariants>(Arrays.asList(new AllVariants(0 , 0.0 , false , "" , "","")));
+    public List<AllVariants> allVariants;
     public String name = "";
     public String uxLayout;
     public Campaign campaign;

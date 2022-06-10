@@ -1,97 +1,53 @@
 package Writer;
 
+import CGson.CGson;
 import Model.Trendyol.*;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.net.URL;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import Util.*;
+import org.json.JSONObject;
+import org.jsoup.nodes.Document;
 
 public class WriteFile {
-    public void writeAFile(Product product , JFileChooser getSelectedFile){
+    WriteExcelFile writeExcelFile = new WriteExcelFile();
+    GetImageFromUrl getImageFromUrl = new GetImageFromUrl();
+    FileNameGenerator fileNameGenerator = new FileNameGenerator();
+    CGson gsonTrendyol = new CGson();
+    public void writeAFile(Product product , JFileChooser getSelectedFile , List<String> getColors){
         try{
-            String fileName = "";
-            String regex = ":+|/+|\"+|<+|>+|\\*+";
-            fileName = product.name.replaceAll(regex , "").trim();
-            File file = null;
-            if (System.getProperty("os.name").startsWith("Mac")){
-                file = new File(getSelectedFile.getSelectedFile()+"/"+fileName);
-            }else{
-                file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
-            }
-
+            File file = fileNameGenerator.writeFileSelectedLocation(product.name , getSelectedFile);
             if(!file.exists()) {
                 file.mkdirs();
             }
-            getImageFromURL(product.images , file);
+            File finalFile = file;
+            AtomicInteger atomicInteger = new AtomicInteger();
+            product.images.forEach(s -> {
+                getImageFromUrl.getLinkFromUrlAndWriteFolder("https://cdn.dsmcdn.com/"+s , finalFile , atomicInteger.getAndIncrement());
+            });
             writeFileInDirectory(file , product);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
-    private void getImageFromURL(List<String> getImage , File file) throws InterruptedException {
-        AtomicInteger count = new AtomicInteger();
-        getImage.forEach(s -> {
-            try {
-                URL url = new URL("https://cdn.dsmcdn.com" + s);
-                BufferedImage bufferedImage = ImageIO.read(url);
-                ImageIO.write(bufferedImage , "png" , new File(file , "image "+(count.getAndIncrement())+".png"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-    private void writeFileInDirectory(File file , Product product) throws InterruptedException {
+    private void writeFileInDirectory(File file , Product product ) throws InterruptedException {
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
         if(product.allVariants.get(0).value.equals("") || product.allVariants.get(0).value == null){
            productDetail = smallWriteExcelFileAMap(product);
         }else{
             productDetail = largeWriteExcelFileAMap(product);
         }
-        writeExcelFile(file , product , productDetail);
+        new WriteExcelFile().writeExcelFile(file , product , productDetail);
     }
-    private void writeExcelFile(File file , Product product , Map<String , Object[]> map) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet spreadsheet = workbook.createSheet(product.productCode);
-        XSSFRow row;
-        File getDirectory = new File(file , "productDetail.xlsx");
-
-        Set<String> keyId = map.keySet();
-        int rowId = 0;
-        try {
-            for (String key : keyId) {
-                row = spreadsheet.createRow(rowId++);
-                Object[] objectArr = map.get(key);
-                int cellid = 0;
-                for (Object obj : objectArr) {
-                    Cell cell = row.createCell(cellid++);
-                    cell.setCellValue((String) obj);
-                }
-            }
-            FileOutputStream fileOutputStream = new FileOutputStream(getDirectory);
-            workbook.write(fileOutputStream);
-            workbook.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    private Map<String , Object[]> smallWriteExcelFileAMap(Product product) throws InterruptedException {
+    private Map<String , Object[]> smallWriteExcelFileAMap(Product product ) throws InterruptedException {
         int count = 2;
         int totalVariable = product.allVariants.size() + product.variants.size() + product.contentDescriptions.size();
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
-
-        productDetail.put("1",new Object[] { "Product name", "Product Code", "Product Barcode" , "Selling Price" , "Discounted Price" , "Original Price" , "Color" , "Product Description" , "" ,"Attributes" , "Original Categories"});
-        Thread.sleep(1000);
+        productDetail.put("1", new ExcelTitles().TRENDYOL_SMALL_TITLE);
         for (int i = 0; i < totalVariable; i++) {
             String name = null;
             String productCode = null;
@@ -129,24 +85,10 @@ public class WriteFile {
         }
         return productDetail;
     }
-    private Map<String , Object[]> largeWriteExcelFileAMap(Product product) throws InterruptedException {
+    private Map<String , Object[]> largeWriteExcelFileAMap(Product product ) throws InterruptedException {
         int count = 3;
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
-        productDetail.put("1",new Object[] {
-                "Product Name",
-                "Product Code",
-                "Product Barcode" ,
-                "Selling Price" , "Discounted Price" , "Original Price",
-                "Color" ,
-                "Body" ,
-                "Body Barcode" ,
-                "Body Product Code" ,
-                "Body Price" ,
-                "Stock Status",
-                "Product Description" ,
-                "" ,
-                "Attributes"});
-
+        productDetail.put("1", new ExcelTitles().TRENDYOL_LARGE_TITLE);
         productDetail.put("2",new Object[] {
                 checkNullVariable(product.name),
                 checkNullVariable(product.productCode) ,
@@ -172,10 +114,11 @@ public class WriteFile {
             whichListBig = product.contentDescriptions.size();
         }
 
-        for (int i = 1; i <= whichListBig; i++) {
+        for (int i = 0; i <= whichListBig; i++) {
             productDetail.put(String.valueOf(count) , writeExcelFileProductDetail(product.allVariants , product.attributes , product.contentDescriptions , i));
             count++;
         }
+
         return productDetail;
     }
     private Object[] writeExcelFileProductDetail(List<AllVariants> getAllVariants , List<Attributes> attributesList , List<ContentDescriptions> getContentDescription , int whichSizeBig){
@@ -189,6 +132,7 @@ public class WriteFile {
         String valueName = "";
 
         String contentDescription = "";
+
         if(whichSizeBig < getAllVariants.size() ){
             value = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).value));
             price = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).price));
@@ -215,5 +159,38 @@ public class WriteFile {
             returnedSafeString = getString;
         }
         return returnedSafeString;
+    }
+    /* Area of colored products (down) */
+    public void coloredProducts(List<String> getColors, JFileChooser getSelectedFile, TrendyolModel trendyolModel) {
+        List<TrendyolModel> trendyolModelList = new ArrayList<TrendyolModel>();
+        AtomicInteger count = new AtomicInteger();
+        File file = fileNameGenerator.writeFileSelectedLocation(trendyolModel.product.name , getSelectedFile);
+        if(!file.exists()) file.mkdirs();
+        getColors.forEach(s -> {
+            try {
+                Document document = new UJsoup().getDiv(s);
+                document.body().getElementsByTag("script").dataNodes().forEach(dataNode -> {
+                    String[] a = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
+                    if(a[0].isEmpty()){
+                        JSONObject jsonObject = new JSONObject(a[1].trim().split("=" , 2)[1].trim().split("window\\.TYPageName=")[0]);
+                        trendyolModelList.add(gsonTrendyol.convertTrendyolModel(jsonObject));
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        trendyolModelList.forEach(trendyolModel1 -> {
+           File underFile =  fileNameGenerator.writeFileInFile(String.valueOf(trendyolModel1.product.name + trendyolModel1.product.allVariants.get(0).barcode) , file);
+           if(!underFile.exists()) underFile.mkdirs();
+            try {
+                writeFileInDirectory(underFile , trendyolModel1.product);
+                trendyolModel1.product.images.forEach(getImages -> {
+                    getImageFromUrl.getLinkFromUrlAndWriteFolder("https://cdn.dsmcdn.com/"+getImages , underFile , count.getAndIncrement());
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
