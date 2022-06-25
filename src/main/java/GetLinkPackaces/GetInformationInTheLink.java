@@ -14,17 +14,18 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class GetInformationInTheLink {
+public class GetInformationInTheLink implements Serializable {
     CGson gsonTrendyol = new CGson();
     WriteFile writeFile = new WriteFile();
-    public void getInformationTrendyolProducts(String links , JFileChooser getSelectedFile)  {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = new ChromeDriver();
-        driver.get(links);
+    public void getInformationTrendyolProducts(WebDriver driver, JFileChooser getSelectedFile, String enterUrlGetText)  {
         Document jsoup = Jsoup.parse(driver.getPageSource());
         Element elements1 = jsoup.body();
         AtomicReference<JSONObject> jsonObjects = new AtomicReference<JSONObject>();
@@ -42,17 +43,12 @@ public class GetInformationInTheLink {
 
         Elements document = elements1.getElementsByClass("slc-img");
         document.forEach(element -> {
-            getColorsLink.add("https://trendyol.com" + element.attr("href"));
+            getColorsLink.add("https://trendyol.com" + element.attr("title"));
         });
-        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink);
-        driver.quit();
+        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText);
     }
-    private void writeAFileFuncPushed(JFileChooser getSelectedFile , JSONObject jsonObject , List<String> getColors){
-        TrendyolModel trendyolModel =  gsonTrendyol.convertTrendyolModel(jsonObject);
-        if(getColors.isEmpty()){
-            writeFile.writeAFile(trendyolModel.product , getSelectedFile , getColors);
-        }else{
-            writeFile.coloredProducts(getColors , getSelectedFile , trendyolModel);
-        }
+    private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText ) {
+        TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
+        writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText);
     }
 }

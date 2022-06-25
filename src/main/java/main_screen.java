@@ -1,16 +1,14 @@
 import GetLinkPackaces.GetLinks;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import org.jsoup.Jsoup;
+import Util.ExcelTitles;
+import Util.FileNameGenerator;
+import Util.WriteExcelFile;
+import org.apache.poi.ss.usermodel.Cell;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.io.File;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,10 +21,11 @@ public class main_screen extends JFrame{
     private JList<String> list1;
     private JComboBox comboBox1;
     private JScrollPane main_scroll_pane;
+    private JButton read_button;
     private JFileChooser jFileChooser;
 
     public main_screen(){
-        Pattern pattern = Pattern.compile("[A-Za-z]");
+        Pattern pattern = Pattern.compile("[A-Z][a-z]");
         GetLinks getLinks = new GetLinks();
         String[] defaultComboBoxList = {"Trendyol"};
         DefaultComboBoxModel<String> comboBoxList = new DefaultComboBoxModel<String>(defaultComboBoxList);
@@ -62,10 +61,48 @@ public class main_screen extends JFrame{
                     jFileChooser.setAcceptAllFileFilterUsed(false);
                     if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                         if(!jFileChooser.getSelectedFile().isFile()){
-                            getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser);
+                            getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser , enterUrlGetText);
                         }
                     }
                 }
+            }
+        });
+
+        WriteExcelFile writeExcelFile = new WriteExcelFile();
+        Map<String , Object[]> stringMap = new TreeMap<>();
+        stringMap.put("1" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+        stringMap.put("2" , new Object[]{"product_name" , "product_code" , "product_barcode" , "product_selling_price" , "product_discounted_price" , "product_original_price" , "product_color" ,"product_body" , "product_body_barcode","product_body_code" , "product_body_price" , "product_stock_status" , "product_description" , "product_attributes"});
+
+        List<String> stringList = new ArrayList<>();
+        final File[] file = {null};
+        List<String> o = new ArrayList<>();
+        read_button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jFileChooser = new JFileChooser();
+                jFileChooser.setDialogTitle("Select File");
+                jFileChooser.setCurrentDirectory(new java.io.File("."));
+                jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                jFileChooser.setAcceptAllFileFilterUsed(false);
+                if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    if(!jFileChooser.getSelectedFile().isFile()){
+                        File files = new FileNameGenerator().writeFileSelectedLocation(enterURLTextField.getText()+".xlsx" , jFileChooser);
+                        if(!files.exists()) {
+                            files.exists();
+                        }
+                        file[0] = files;
+
+                        int size = writeExcelFile.getExcelFileRowSize(files) ;
+                        int columnSize = writeExcelFile.getExcelFileColumnSize(files);
+                        Map<String , List<String>> stringList = writeExcelFile.readExcelFile(files);
+                        if(stringList.isEmpty() || stringList == null){
+                            writeExcelFile.writeExcelFile(files , enterURLTextField.getText() , stringMap);
+                        }else{
+                            writeExcelFile.writeExcelFileCustom(files , columnSize , stringList);
+                        }
+                    }
+                }
+               // writeExcelFile.writeExcelFileCustom(file[0] , 10 ,o);
             }
         });
     }

@@ -18,22 +18,22 @@ public class WriteFile {
     GetImageFromUrl getImageFromUrl = new GetImageFromUrl();
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
-    public void writeAFile(Product product , JFileChooser getSelectedFile , List<String> getColors){
+    public void writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
         try{
-            File file = fileNameGenerator.writeFileSelectedLocation(product.name , getSelectedFile);
-            if(!file.exists()) {
-                file.mkdirs();
-            }
-            File finalFile = file;
-            AtomicInteger atomicInteger = new AtomicInteger();
-            product.images.forEach(s -> {
-                getImageFromUrl.getLinkFromUrlAndWriteFolder("https://cdn.dsmcdn.com/"+s , finalFile , atomicInteger.getAndIncrement());
-            });
-            writeFileInDirectory(file , product);
+            File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+            if(!file.exists()) file.exists();
+
+            int count = 2;
+            Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
+
+            new WriteExcelFile().writeExcelFile(file , enterUrlGetText ,productDetail);
+            count++;
         }catch (Exception e){
             e.printStackTrace();
         }
     }
+
+
     private void writeFileInDirectory(File file , Product product ) throws InterruptedException {
         Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
         if(product.allVariants.get(0).value.equals("") || product.allVariants.get(0).value == null){
@@ -41,7 +41,7 @@ public class WriteFile {
         }else{
             productDetail = largeWriteExcelFileAMap(product);
         }
-        new WriteExcelFile().writeExcelFile(file , product , productDetail);
+        new WriteExcelFile().writeExcelFile(file , "product" , productDetail);
     }
     private Map<String , Object[]> smallWriteExcelFileAMap(Product product ) throws InterruptedException {
         int count = 2;
@@ -192,5 +192,12 @@ public class WriteFile {
                 e.printStackTrace();
             }
         });
+    }
+
+
+    private File checkFile(String enterUrlGetText , JFileChooser getSelectedFile){
+        File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+        if(!file.exists()) file.exists();
+        return file;
     }
 }
