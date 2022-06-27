@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class WriteExcelFile {
@@ -36,34 +37,34 @@ public class WriteExcelFile {
 
     public Map<String , List<String>> readExcelFile(File file){
         Map<String , List<String>> map = new TreeMap<>();
+        int count = 0;
         try {
             FileInputStream excelFile = new FileInputStream(file);
             XSSFWorkbook wb = new XSSFWorkbook(excelFile);
             XSSFSheet sheet = wb.getSheetAt(0);
-            List<String> getCellText = new ArrayList<>();
-
-            int rowCount = 0;
-            for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum()  ; i++) {
-                Row row = sheet.getRow(i);
-                if(row != null){
+            for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum() ; i++) {
+                List<String> setList = new ArrayList<>();
+                System.out.println(count);
+                if(i == count){
+                    Row row = sheet.getRow(i);
                     for (int j = row.getFirstCellNum(); j < row.getLastCellNum() ; j++) {
                         Cell cell = row.getCell(j);
-                        if(!cell.getStringCellValue().isEmpty()){
-                            getCellText.add(cell.getStringCellValue());
-                        }
+                        setList.add(cell.getStringCellValue());
+                        System.out.println(cell.getStringCellValue());
                     }
-
                 }
-                if(!getCellText.isEmpty()){
-                    map.put(String.valueOf(rowCount),  getCellText);
-                }
-                rowCount++;
+                if(!setList.isEmpty()) map.put(String.valueOf(i) , setList);
+                Thread.sleep(1000);
+                count++;
             }
+
             wb.close();
             excelFile.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return map;
@@ -111,12 +112,10 @@ public class WriteExcelFile {
         try {
             for (int i = 0; i < keyId.size(); i++) {
                 row = spreadsheet.createRow(i);
-                List<String> stringList = map.get(String.valueOf(i));
-                for (int j = 0; j < getCellSize ; j++) {
-                    Cell cell = row.createCell(j);
-                    for (String writeCell : stringList) {
-                        cell.setCellValue(writeCell);
-                    }
+                List<String> getStringList = map.get(String.valueOf(i));
+                for (int j = 0; j < getStringList.size() ; j++) {
+                  Cell cell = row.createCell(j);
+                  cell.setCellValue(getStringList.get(j));
                 }
             }
 
