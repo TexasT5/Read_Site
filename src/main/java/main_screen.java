@@ -25,7 +25,7 @@ public class main_screen extends JFrame{
     private JFileChooser jFileChooser;
 
     public main_screen(){
-        Pattern pattern = Pattern.compile("[A-Z][a-z]");
+        Pattern pattern = Pattern.compile("[A-Z+a-z]");
         GetLinks getLinks = new GetLinks();
         String[] defaultComboBoxList = {"Trendyol"};
         DefaultComboBoxModel<String> comboBoxList = new DefaultComboBoxModel<String>(defaultComboBoxList);
@@ -99,11 +99,16 @@ public class main_screen extends JFrame{
 
                         int size = writeExcelFile.getExcelFileRowSize(files) ;
                         int columnSize = writeExcelFile.getExcelFileColumnSize(files);
-                        Map<String , List<String>> stringList = writeExcelFile.readExcelFile(files);
+                        Map<String , Object[]> stringList = writeExcelFile.readExcelFile(files);
                         if(stringList.isEmpty() || stringList == null){
                             writeExcelFile.writeExcelFile(files , enterURLTextField.getText() , stringMap);
                         }else{
-                            writeExcelFile.writeExcelFileCustom(files , columnSize , stringList);
+                            stringList.forEach((s, objects) -> {
+                                System.out.println(s);
+                                for ( Object o1: objects) {
+                                    System.out.println(o1);
+                                }
+                            });
                         }
                     }
                 }

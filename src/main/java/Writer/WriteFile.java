@@ -3,33 +3,50 @@ package Writer;
 import CGson.CGson;
 import Model.Trendyol.*;
 
+import javax.management.StringValueExp;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import Util.*;
+import com.google.errorprone.annotations.Var;
+import org.apache.xmlbeans.impl.xb.xsdschema.All;
+import org.apache.xmlbeans.impl.xb.xsdschema.NamedGroup;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 
-public class WriteFile {
+public class WriteFile implements Serializable {
     WriteExcelFile writeExcelFile = new WriteExcelFile();
     GetImageFromUrl getImageFromUrl = new GetImageFromUrl();
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
     public void writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
-        try{
-            File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-            if(!file.exists()) file.exists();
-
-            int count = 2;
-            Map<String, Object[]> productDetail = new TreeMap<String, Object[]>();
-
-            new WriteExcelFile().writeExcelFile(file , enterUrlGetText ,productDetail);
-            count++;
-        }catch (Exception e){
-            e.printStackTrace();
+        File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+        if(!file.exists()) file.exists();
+        Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
+        if(stringList.isEmpty()){
+            stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
+            int size = writeExcelFile.getExcelFileRowSize(file) ;
+            int totalSizes = product.attributes.size() + product.allVariants.size() + product.contentDescriptions.size();
+            for (int i = 0; i <= totalSizes; i++) {
+                size++;
+                Object[] objects = writeExcelFileProductDetail(product, i);
+                if(objects != null) stringList.put(String.valueOf(size) , objects); writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+            }
+        }else{
+            stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
+            int size = writeExcelFile.getExcelFileRowSize(file) ;
+            int totalSizes = product.attributes.size() + product.allVariants.size() + product.contentDescriptions.size();
+            for (int i = 0; i <= totalSizes; i++) {
+                size++;
+                Object[] objects = writeExcelFileProductDetail(product, i);
+                if(objects != null) stringList.put(String.valueOf(size) , objects); writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+            }
         }
     }
 
@@ -115,39 +132,57 @@ public class WriteFile {
         }
 
         for (int i = 0; i <= whichListBig; i++) {
-            productDetail.put(String.valueOf(count) , writeExcelFileProductDetail(product.allVariants , product.attributes , product.contentDescriptions , i));
+            //productDetail.put(String.valueOf(count) , writeExcelFileProductDetail(product.allVariants , product.attributes , product.contentDescriptions , i));
             count++;
         }
 
         return productDetail;
     }
-    private Object[] writeExcelFileProductDetail(List<AllVariants> getAllVariants , List<Attributes> attributesList , List<ContentDescriptions> getContentDescription , int whichSizeBig){
+    private Object[] writeExcelFileProductDetail(Product product, int whichSizeBig){
+
+        Object[] objects = new Object[]{};
         String value = "";
         String price = "";
         String inStock = "";
-        String barcode = "";
         String itemNumber = "";
+        String body_barcode = "";
+
+        //Single
+        String barcode = product.allVariants.get(0).barcode;
+        String name = product.name;
+        String productCode = product.productCode;
+        String sellingPrice = product.price.sellingPrice.text;
+        String originalPrice = product.price.originalPrice.text;
+        String discountedPrice = product.price.discountedPrice.text;
+        String color = product.color;
 
         String keyName = "";
         String valueName = "";
 
         String contentDescription = "";
 
-        if(whichSizeBig < getAllVariants.size() ){
-            value = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).value));
-            price = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).price));
-            inStock = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).inStock));
-            barcode = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).barcode));
-            itemNumber = checkNullVariable(String.valueOf(getAllVariants.get(whichSizeBig).itemNumber));
+        if(whichSizeBig < product.allVariants.size() ){
+            value = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).value));
+            price = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).price));
+            inStock = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).inStock));
+            System.out.println("STOCK STATUS : " + inStock);
+            body_barcode = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).barcode));
+            itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
         }
-        if(whichSizeBig < attributesList.size()){
-            keyName = checkNullVariable(attributesList.get(whichSizeBig).key.name);
-            valueName = checkNullVariable(attributesList.get(whichSizeBig).value.name);
+        if(whichSizeBig < product.attributes.size()){
+            keyName = checkNullVariable(product.attributes.get(whichSizeBig).key.name);
+            valueName = checkNullVariable(product.attributes.get(whichSizeBig).value.name);
         }
-        if(whichSizeBig < getContentDescription.size()){
-            contentDescription = checkNullVariable(getContentDescription.get(whichSizeBig).description);
+        if(whichSizeBig < product.contentDescriptions.size()){
+            contentDescription = checkNullVariable(product.contentDescriptions.get(whichSizeBig).description);
         }
-        return new Object[]{"","","","","", String.valueOf(value) , String.valueOf(barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , "" , String.valueOf(keyName) , String.valueOf(valueName)};
+        if(!body_barcode.isEmpty()){
+          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName)};
+        }else{
+            objects = null;
+        }
+
+        return objects;
     }
     private String checkNullVariable(String getString){
         String returnedSafeString = "";
@@ -193,8 +228,6 @@ public class WriteFile {
             }
         });
     }
-
-
     private File checkFile(String enterUrlGetText , JFileChooser getSelectedFile){
         File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
         if(!file.exists()) file.exists();

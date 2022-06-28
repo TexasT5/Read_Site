@@ -2,8 +2,9 @@ package Util;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.Serializable;
 
-public class FileNameGenerator {
+public class FileNameGenerator implements Serializable {
     public File writeFileSelectedLocation(String getName , JFileChooser getSelectedFile){
         String regex = ":+|/+|\"+|<+|>+|\\*+";
         String fileName = getName.replaceAll(regex , " ").trim();
@@ -13,6 +14,7 @@ public class FileNameGenerator {
         }else{
             file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
         }
+        if(!file.exists()) file.exists();
         return file;
     }
 
