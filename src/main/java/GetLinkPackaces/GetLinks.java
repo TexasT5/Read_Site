@@ -51,6 +51,11 @@ public class GetLinks implements Serializable {
                             listModel.addElement("https://www.trendyol.com"+getHref);
                             if(!getHref.equals("")){
                                 driver.get("https://www.trendyol.com"+getHref);
+                                try {
+                                    Thread.sleep(5000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
                             getInformationInTheLink.getInformationTrendyolProducts(driver , getSelectedFile , enterUrlGetText);
                             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();

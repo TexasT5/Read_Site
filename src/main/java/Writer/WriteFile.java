@@ -29,6 +29,9 @@ public class WriteFile implements Serializable {
         File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
         if(!file.exists()) file.exists();
         Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
+
+
+
         if(stringList.isEmpty()){
             stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
             int size = writeExcelFile.getExcelFileRowSize(file) ;
@@ -36,7 +39,10 @@ public class WriteFile implements Serializable {
             for (int i = 0; i <= totalSizes; i++) {
                 size++;
                 Object[] objects = writeExcelFileProductDetail(product, i);
-                if(objects != null) stringList.put(String.valueOf(size) , objects); writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+                if(objects != null && !objects.equals("")){
+                    stringList.put(String.valueOf(size) , objects);
+                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+                }
             }
         }else{
             stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
@@ -45,9 +51,21 @@ public class WriteFile implements Serializable {
             for (int i = 0; i <= totalSizes; i++) {
                 size++;
                 Object[] objects = writeExcelFileProductDetail(product, i);
-                if(objects != null) stringList.put(String.valueOf(size) , objects); writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+                if(objects != null && !objects.equals("")){
+                    stringList.put(String.valueOf(size) , objects);
+                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+                }
             }
         }
+
+        stringList.forEach((s, objects) -> {
+            System.out.println(s);
+            for (Object object : objects) {
+                if(object != null){
+                    System.out.println(object);
+                }
+            }
+        });
     }
 
 

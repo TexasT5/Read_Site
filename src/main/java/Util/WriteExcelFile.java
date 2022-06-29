@@ -48,19 +48,19 @@ public class WriteExcelFile implements Serializable{
 
     public void fastestExcelLibrary(File file , String brandName , Map<String , Object[]> map){
         try(OutputStream outputStream = FileUtil.getOutputStream(file)){
-            Workbook wb = new Workbook(outputStream, "MyApplication", "1.0");
+            Workbook wb = new Workbook(outputStream, "Application", "1.0");
             Worksheet ws = wb.newWorksheet(brandName);
-            SXSSFRow row;
             Set<String> keyId = map.keySet();
             int rowId = 0;
             for (String key : keyId) {
                 int cellId = 0;
                 Object[] objectArr = map.get(key);
                 for (Object ob: objectArr) {
-                    ws.value(Integer.parseInt(key), cellId++ , ob.toString());
+                    ws.value(rowId++, cellId++ , ob.toString());
                 }
             }
             wb.finish();
+            outputStream.close();
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -102,7 +102,15 @@
         </dependency>
 
 
-        <!-- Selenyum -->
+        <!-- Chrome driver selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-chrome-driver</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+
+        <!-- Selenium -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
