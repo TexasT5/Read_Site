@@ -14,7 +14,6 @@ public class FileNameGenerator implements Serializable {
         }else{
             file = new File(getSelectedFile.getSelectedFile()+"\\"+fileName);
         }
-        if(!file.exists()) file.exists();
         return file;
     }
 

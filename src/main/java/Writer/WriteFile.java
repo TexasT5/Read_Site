@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import Util.*;
+import cn.hutool.core.text.csv.CsvUtil;
 import com.google.errorprone.annotations.Var;
 import org.apache.xmlbeans.impl.xb.xsdschema.All;
 import org.apache.xmlbeans.impl.xb.xsdschema.NamedGroup;
@@ -25,47 +26,22 @@ public class WriteFile implements Serializable {
     GetImageFromUrl getImageFromUrl = new GetImageFromUrl();
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
-    public void writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
+    public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
         File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-        if(!file.exists()) file.exists();
+
         Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
 
-
-
-        if(stringList.isEmpty()){
-            stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
-            int size = writeExcelFile.getExcelFileRowSize(file) ;
-            int totalSizes = product.attributes.size() + product.allVariants.size() + product.contentDescriptions.size();
-            for (int i = 0; i <= totalSizes; i++) {
+        int size = writeExcelFile.getExcelFileRowSize(file);
+        int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
+        stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+        for (int i = 0; i < totalSize; i++) {
+            Object[] objects = writeExcelFileProductDetail(product , i);
+            if(objects != null) {
+                stringList.put(String.valueOf(size) , objects);
                 size++;
-                Object[] objects = writeExcelFileProductDetail(product, i);
-                if(objects != null && !objects.equals("")){
-                    stringList.put(String.valueOf(size) , objects);
-                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
-                }
-            }
-        }else{
-            stringList.put("0", new ExcelTitles().TRENDYOL_LARGE_TITLE);
-            int size = writeExcelFile.getExcelFileRowSize(file) ;
-            int totalSizes = product.attributes.size() + product.allVariants.size() + product.contentDescriptions.size();
-            for (int i = 0; i <= totalSizes; i++) {
-                size++;
-                Object[] objects = writeExcelFileProductDetail(product, i);
-                if(objects != null && !objects.equals("")){
-                    stringList.put(String.valueOf(size) , objects);
-                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
-                }
             }
         }
-
-        stringList.forEach((s, objects) -> {
-            System.out.println(s);
-            for (Object object : objects) {
-                if(object != null){
-                    System.out.println(object);
-                }
-            }
-        });
+        writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
     }
 
 
@@ -157,7 +133,6 @@ public class WriteFile implements Serializable {
         return productDetail;
     }
     private Object[] writeExcelFileProductDetail(Product product, int whichSizeBig){
-
         Object[] objects = new Object[]{};
         String value = "";
         String price = "";
@@ -183,7 +158,6 @@ public class WriteFile implements Serializable {
             value = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).value));
             price = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).price));
             inStock = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).inStock));
-            System.out.println("STOCK STATUS : " + inStock);
             body_barcode = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).barcode));
             itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
         }

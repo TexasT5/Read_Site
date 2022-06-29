@@ -25,7 +25,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GetInformationInTheLink implements Serializable {
     CGson gsonTrendyol = new CGson();
     WriteFile writeFile = new WriteFile();
-    public void getInformationTrendyolProducts(WebDriver driver, JFileChooser getSelectedFile, String enterUrlGetText)  {
+    public void getInformationTrendyolProducts(String url, JFileChooser getSelectedFile, String enterUrlGetText)  {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.get(url);
         Document jsoup = Jsoup.parse(driver.getPageSource());
         Element elements1 = jsoup.body();
         AtomicReference<JSONObject> jsonObjects = new AtomicReference<JSONObject>();
@@ -46,6 +49,7 @@ public class GetInformationInTheLink implements Serializable {
             getColorsLink.add("https://trendyol.com" + element.attr("title"));
         });
         writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText);
+        driver.quit();
     }
     private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText ) {
         TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);

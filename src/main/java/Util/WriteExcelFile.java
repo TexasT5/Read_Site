@@ -6,6 +6,7 @@ import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -51,12 +52,13 @@ public class WriteExcelFile implements Serializable{
             Workbook wb = new Workbook(outputStream, "Application", "1.0");
             Worksheet ws = wb.newWorksheet(brandName);
             Set<String> keyId = map.keySet();
-            int rowId = 0;
             for (String key : keyId) {
                 int cellId = 0;
                 Object[] objectArr = map.get(key);
-                for (Object ob: objectArr) {
-                    ws.value(rowId++, cellId++ , ob.toString());
+                if(objectArr != null){
+                    for (Object ob: objectArr) {
+                        ws.value(Integer.parseInt(key), cellId++ , ob.toString());
+                    }
                 }
             }
             wb.finish();
@@ -98,23 +100,23 @@ public class WriteExcelFile implements Serializable{
         int count = 0;
         try {
             FileInputStream excelFile = new FileInputStream(file);
-            XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-            SXSSFWorkbook wb = new SXSSFWorkbook(workbook);
-            SXSSFSheet sheet = wb.getSheetAt(0);
+            XSSFWorkbook wb = new XSSFWorkbook(excelFile);
+            XSSFSheet sheet = wb.getSheetAt(0);
+
+            System.out.println(sheet.getLastRowNum());
             for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum() ; i++) {
                 List<String> setList = new ArrayList<>();
                 if(i == count){
-                    SXSSFRow row = sheet.getRow(i);
+                    XSSFRow row = sheet.getRow(i);
                     for (int j = row.getFirstCellNum(); j < row.getLastCellNum() ; j++) {
-                        SXSSFCell cell = row.getCell(j);
+                        XSSFCell cell = row.getCell(j);
                         setList.add(cell.getStringCellValue());
                     }
                 }
-                if(!setList.isEmpty()) map.put(String.valueOf(i) , setList.toArray());
-                Thread.sleep(100);
+                if(!setList.isEmpty()) map.put(String.valueOf(count) , setList.toArray());
+                Thread.sleep(1000);
                 count++;
             }
-            wb.dispose();
             wb.close();
             excelFile.close();
         } catch (FileNotFoundException e) {

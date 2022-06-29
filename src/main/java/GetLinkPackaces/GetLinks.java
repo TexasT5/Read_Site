@@ -31,15 +31,11 @@ public class GetLinks implements Serializable {
     }
 
     private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane, JFileChooser getSelectedFile, String enterUrlGetText){
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = new ChromeDriver();
+        ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         UJsoup uJsoup = new UJsoup();
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                File files = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-                if(!files.exists()) files.exists();
                 AtomicBoolean threadEnding = new AtomicBoolean(true);
                 int i = 1;
                 while(threadEnding.get()){
@@ -49,19 +45,10 @@ public class GetLinks implements Serializable {
                         getLink.forEach(element -> {
                             String getHref = element.attr("href");
                             listModel.addElement("https://www.trendyol.com"+getHref);
-                            if(!getHref.equals("")){
-                                driver.get("https://www.trendyol.com"+getHref);
-                                try {
-                                    Thread.sleep(5000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            getInformationInTheLink.getInformationTrendyolProducts(driver , getSelectedFile , enterUrlGetText);
+                            getInformationInTheLink.getInformationTrendyolProducts(("https://www.trendyol.com"+getHref) , getSelectedFile , enterUrlGetText);
                             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
                             scrollBar.setValue(scrollBar.getMaximum());
                         });
-                        driver.quit();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

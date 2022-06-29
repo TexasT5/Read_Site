@@ -61,6 +61,8 @@ public class main_screen extends JFrame{
                     jFileChooser.setAcceptAllFileFilterUsed(false);
                     if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                         if(!jFileChooser.getSelectedFile().isFile()){
+                            File files = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , jFileChooser);
+                            if(!files.exists()) files.exists();
                             getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser , enterUrlGetText);
                         }
                     }
