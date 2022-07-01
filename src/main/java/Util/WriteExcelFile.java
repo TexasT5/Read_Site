@@ -1,6 +1,7 @@
 package Util;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.csv.CsvUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
@@ -12,13 +13,12 @@ import org.dhatim.fastexcel.Worksheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
 
 import java.io.*;
 import java.util.*;
-
-import static org.bouncycastle.asn1.x500.style.AbstractX500NameStyle.copyHashTable;
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class WriteExcelFile implements Serializable{
     public void writeExcelFile(File file  , String  getEnterUrl , Map<String , Object[]> map){
@@ -44,6 +44,31 @@ public class WriteExcelFile implements Serializable{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public Map<String , Object[]> readFastestExcelFile(File file){
+        Map<String , Object[]> map = new TreeMap<>();
+        ArrayList<String> convertableMapObject = new ArrayList<>();
+        AtomicInteger count = new AtomicInteger(0);
+        try(var wb = new ReadableWorkbook(file)){
+            org.dhatim.fastexcel.reader.Sheet sheet = wb.getFirstSheet();
+            try(Stream<org.dhatim.fastexcel.reader.Row> rows = sheet.openStream()){
+                rows.forEach(cells -> {
+
+
+                });
+
+
+                rows.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            wb.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return map;
     }
 
 
@@ -102,8 +127,6 @@ public class WriteExcelFile implements Serializable{
             FileInputStream excelFile = new FileInputStream(file);
             XSSFWorkbook wb = new XSSFWorkbook(excelFile);
             XSSFSheet sheet = wb.getSheetAt(0);
-
-            System.out.println(sheet.getLastRowNum());
             for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum() ; i++) {
                 List<String> setList = new ArrayList<>();
                 if(i == count){

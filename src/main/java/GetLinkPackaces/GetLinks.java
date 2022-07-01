@@ -31,7 +31,7 @@ public class GetLinks implements Serializable {
     }
 
     private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane, JFileChooser getSelectedFile, String enterUrlGetText){
-        ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         UJsoup uJsoup = new UJsoup();
         executorService.execute(new Runnable() {
             @Override
@@ -44,8 +44,22 @@ public class GetLinks implements Serializable {
                         Elements getLink = document.select(".p-card-chldrn-cntnr > a");
                         getLink.forEach(element -> {
                             String getHref = element.attr("href");
+
+                            if(getHref.equals("")){
+                                threadEnding.set(false);
+                                executorService.shutdown();
+                                try {
+                                    if (!executorService.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
+                                        executorService.shutdownNow();
+                                    }
+                                } catch (InterruptedException e) {
+                                    executorService.shutdownNow();
+                                }
+                            }
                             listModel.addElement("https://www.trendyol.com"+getHref);
-                            getInformationInTheLink.getInformationTrendyolProducts(("https://www.trendyol.com"+getHref) , getSelectedFile , enterUrlGetText);
+
+                            getInformationInTheLink.getInformationTrendyolProducts(("https://www.trendyol.com"+getHref), getSelectedFile , enterUrlGetText);
+
                             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
                             scrollBar.setValue(scrollBar.getMaximum());
                         });
@@ -56,40 +70,5 @@ public class GetLinks implements Serializable {
 
             }
         });
-    }
-
-
-    private void test(){
-        /*
-        while(threadEnding.get()){
-            try {
-                Document document = uJsoup.getDiv("https://www.trendyol.com/sr?q="+getBrand+"&qt="+getBrand+"&st="+getBrand+"&os=2&pi="+i);
-                Elements getLink = document.select(".p-card-chldrn-cntnr > a");
-                if(getLink.isEmpty()){
-                    System.out.println("boş");
-                    threadEnding.set(false);
-                    executorService.shutdown();
-                    try {
-                        if (!executorService.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
-                            executorService.shutdownNow();
-                        }
-                    } catch (InterruptedException e) {
-                        executorService.shutdownNow();
-                    }
-                }else{
-                    getLink.forEach(element -> {
-                        String getHref = element.attr("href");
-                        String[] getBrandSplit = getHref.split(getBrand);
-                        listModel.addElement("https://www.trendyol.com"+getHref);
-                        getInformationInTheLink.getInformationTrendyolProducts("https://www.trendyol.com"+getHref , getSelectedFile);
-                        JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
-                        scrollBar.setValue(scrollBar.getMaximum());
-                    });
-                }
-                i++;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
     }
 }

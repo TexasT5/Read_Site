@@ -27,21 +27,31 @@ public class WriteFile implements Serializable {
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
     public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
-        File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-
-        Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
-
-        int size = writeExcelFile.getExcelFileRowSize(file);
-        int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
-        stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
-        for (int i = 0; i < totalSize; i++) {
-            Object[] objects = writeExcelFileProductDetail(product , i);
-            if(objects != null) {
-                stringList.put(String.valueOf(size) , objects);
-                size++;
-            }
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+                    Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
+                    int size = writeExcelFile.getExcelFileRowSize(file);
+                    int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
+                    stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+                    for (int i = 0; i < totalSize; i++) {
+                        Object[] objects = writeExcelFileProductDetail(product , getColors ,i);
+                        if(objects != null) {
+                            stringList.put(String.valueOf(size) , objects);
+                            size++;
+                        }
+                    }
+                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+                }
+            }).join(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+
+        //Map<String , Object[]> readFastestExcelFileTest = writeExcelFile.readFastestExcelFile(file);
+
     }
 
 
@@ -132,13 +142,14 @@ public class WriteFile implements Serializable {
 
         return productDetail;
     }
-    private Object[] writeExcelFileProductDetail(Product product, int whichSizeBig){
+    private Object[] writeExcelFileProductDetail(Product product, List<String> getColors , int whichSizeBig){
         Object[] objects = new Object[]{};
         String value = "";
         String price = "";
         String inStock = "";
         String itemNumber = "";
         String body_barcode = "";
+        String imageURL = "";
 
         //Single
         String barcode = product.allVariants.get(0).barcode;
@@ -161,6 +172,17 @@ public class WriteFile implements Serializable {
             body_barcode = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).barcode));
             itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
         }
+
+        if(whichSizeBig < getColors.size()){
+            color = getColors.get(whichSizeBig);
+        }else{
+            color = "";
+        }
+
+        if(whichSizeBig < product.images.size()){
+            imageURL = product.images.get(whichSizeBig);
+        }
+
         if(whichSizeBig < product.attributes.size()){
             keyName = checkNullVariable(product.attributes.get(whichSizeBig).key.name);
             valueName = checkNullVariable(product.attributes.get(whichSizeBig).value.name);
@@ -169,7 +191,7 @@ public class WriteFile implements Serializable {
             contentDescription = checkNullVariable(product.contentDescriptions.get(whichSizeBig).description);
         }
         if(!body_barcode.isEmpty()){
-          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName)};
+          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf("https://cdn.dsmcdn.com"+imageURL)};
         }else{
             objects = null;
         }

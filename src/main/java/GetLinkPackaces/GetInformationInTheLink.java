@@ -26,7 +26,6 @@ public class GetInformationInTheLink implements Serializable {
     CGson gsonTrendyol = new CGson();
     WriteFile writeFile = new WriteFile();
     public void getInformationTrendyolProducts(String url, JFileChooser getSelectedFile, String enterUrlGetText)  {
-        WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver();
         driver.get(url);
         Document jsoup = Jsoup.parse(driver.getPageSource());

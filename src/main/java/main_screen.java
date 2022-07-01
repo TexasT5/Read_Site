@@ -2,6 +2,7 @@ import GetLinkPackaces.GetLinks;
 import Util.ExcelTitles;
 import Util.FileNameGenerator;
 import Util.WriteExcelFile;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.poi.ss.usermodel.Cell;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ public class main_screen extends JFrame{
     private JFileChooser jFileChooser;
 
     public main_screen(){
+        WebDriverManager.chromedriver().setup();
         Pattern pattern = Pattern.compile("[A-Z+a-z]");
         GetLinks getLinks = new GetLinks();
         String[] defaultComboBoxList = {"Trendyol"};
