@@ -25,9 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GetInformationInTheLink implements Serializable {
     CGson gsonTrendyol = new CGson();
     WriteFile writeFile = new WriteFile();
-    public void getInformationTrendyolProducts(String url, JFileChooser getSelectedFile, String enterUrlGetText)  {
-        WebDriver driver = new ChromeDriver();
-        driver.get(url);
+    public void getInformationTrendyolProducts(WebDriver driver, JFileChooser getSelectedFile, String enterUrlGetText, ExecutorService executorService)  {
         Document jsoup = Jsoup.parse(driver.getPageSource());
         Element elements1 = jsoup.body();
         AtomicReference<JSONObject> jsonObjects = new AtomicReference<JSONObject>();
@@ -45,13 +43,12 @@ public class GetInformationInTheLink implements Serializable {
 
         Elements document = elements1.getElementsByClass("slc-img");
         document.forEach(element -> {
-            getColorsLink.add("https://trendyol.com" + element.attr("title"));
+            getColorsLink.add(element.attr("title"));
         });
-        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText);
-        driver.quit();
+        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText , executorService);
     }
-    private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText ) {
+    private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText, ExecutorService executorService) {
         TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
-        writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText);
+        writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText , executorService);
     }
 }

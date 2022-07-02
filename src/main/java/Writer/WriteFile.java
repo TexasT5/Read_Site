@@ -3,7 +3,6 @@ package Writer;
 import CGson.CGson;
 import Model.Trendyol.*;
 
-import javax.management.StringValueExp;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import Util.*;
-import cn.hutool.core.text.csv.CsvUtil;
-import com.google.errorprone.annotations.Var;
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
-import org.apache.xmlbeans.impl.xb.xsdschema.NamedGroup;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 
@@ -26,32 +21,27 @@ public class WriteFile implements Serializable {
     GetImageFromUrl getImageFromUrl = new GetImageFromUrl();
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
-    public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText){
+
+    public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText, ExecutorService executorServices){
+        File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+        Map<String , Object[]> stringList = writeExcelFile.readFastestExcelFile(file);
+        int size = writeExcelFile.getExcelFileRowSize(file);
+        int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
+        stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+        for (int j = 0; j < totalSize; j++) {
+            Object[] objects = writeExcelFileProductDetail(product , getColors ,j);
+            if(objects != null) {
+                stringList.put(String.valueOf(size) , objects);
+                size++;
+            }
+        }
+        writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+
         try {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-                    Map<String , Object[]> stringList = writeExcelFile.readExcelFile(file);
-                    int size = writeExcelFile.getExcelFileRowSize(file);
-                    int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
-                    stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
-                    for (int i = 0; i < totalSize; i++) {
-                        Object[] objects = writeExcelFileProductDetail(product , getColors ,i);
-                        if(objects != null) {
-                            stringList.put(String.valueOf(size) , objects);
-                            size++;
-                        }
-                    }
-                    writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
-                }
-            }).join(5000);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //Map<String , Object[]> readFastestExcelFileTest = writeExcelFile.readFastestExcelFile(file);
-
     }
 
 
@@ -180,7 +170,9 @@ public class WriteFile implements Serializable {
         }
 
         if(whichSizeBig < product.images.size()){
-            imageURL = product.images.get(whichSizeBig);
+            imageURL = "https://cdn.dsmcdn.com"+product.images.get(whichSizeBig);
+        }else{
+            imageURL = "";
         }
 
         if(whichSizeBig < product.attributes.size()){
@@ -191,7 +183,7 @@ public class WriteFile implements Serializable {
             contentDescription = checkNullVariable(product.contentDescriptions.get(whichSizeBig).description);
         }
         if(!body_barcode.isEmpty()){
-          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf("https://cdn.dsmcdn.com"+imageURL)};
+          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
         }else{
             objects = null;
         }

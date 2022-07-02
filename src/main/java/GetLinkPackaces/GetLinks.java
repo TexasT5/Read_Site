@@ -2,8 +2,10 @@ package GetLinkPackaces;
 
 import Util.FileNameGenerator;
 import Util.UJsoup;
+import com.github.dockerjava.api.command.AuthCmd;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.commons.compress.utils.OsgiUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.WebDriver;
@@ -20,23 +22,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GetLinks implements Serializable {
     GetInformationInTheLink getInformationInTheLink = new GetInformationInTheLink();
-    public void getLinkInSites(String siteName, String enterBrand, DefaultListModel<String> listModel, JScrollPane main_scroll_pane, JFileChooser getSelectFile, String enterUrlGetText){
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
+    public void getLinkInSites(String siteName, String enterBrand, DefaultListModel<String> listModel, JScrollPane main_scroll_pane, JFileChooser getSelectFile, String enterUrlGetText, JLabel counter){
         switch (siteName){
             case "Trendyol":
-                getTrendyolProductLinks(enterBrand , listModel, main_scroll_pane , getSelectFile , enterUrlGetText);
-            break;
+                getTrendyolProductLinks(enterBrand , listModel, main_scroll_pane , getSelectFile , enterUrlGetText , counter);
+                break;
 
             default:break;
         }
     }
 
-    private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane, JFileChooser getSelectedFile, String enterUrlGetText){
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private void getTrendyolProductLinks(String getBrand, DefaultListModel<String> listModel, JScrollPane scrollPane, JFileChooser getSelectedFile, String enterUrlGetText, JLabel counter){
         UJsoup uJsoup = new UJsoup();
+        WebDriver driver = new ChromeDriver();
+        AtomicBoolean threadEnding = new AtomicBoolean(true);
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                AtomicBoolean threadEnding = new AtomicBoolean(true);
                 int i = 1;
                 while(threadEnding.get()){
                     try {
@@ -44,7 +47,6 @@ public class GetLinks implements Serializable {
                         Elements getLink = document.select(".p-card-chldrn-cntnr > a");
                         getLink.forEach(element -> {
                             String getHref = element.attr("href");
-
                             if(getHref.equals("")){
                                 threadEnding.set(false);
                                 executorService.shutdown();
@@ -55,19 +57,32 @@ public class GetLinks implements Serializable {
                                 } catch (InterruptedException e) {
                                     executorService.shutdownNow();
                                 }
+                                driver.quit();
                             }
                             listModel.addElement("https://www.trendyol.com"+getHref);
+                            try{
+                                driver.get("https://www.trendyol.com"+getHref);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                            int getCount = Integer.parseInt(counter.getText());
+                            getCount++;
+                            counter.setText(String.valueOf(getCount));
 
-                            getInformationInTheLink.getInformationTrendyolProducts(("https://www.trendyol.com"+getHref), getSelectedFile , enterUrlGetText);
-
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            getInformationInTheLink.getInformationTrendyolProducts(driver, getSelectedFile , enterUrlGetText , executorService);
                             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
                             scrollBar.setValue(scrollBar.getMaximum());
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    i++;
                 }
-
             }
         });
     }

@@ -1,7 +1,6 @@
 package Util;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.csv.CsvUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
@@ -51,21 +50,20 @@ public class WriteExcelFile implements Serializable{
         Map<String , Object[]> map = new TreeMap<>();
         ArrayList<String> convertableMapObject = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
-        try(var wb = new ReadableWorkbook(file)){
-            org.dhatim.fastexcel.reader.Sheet sheet = wb.getFirstSheet();
-            try(Stream<org.dhatim.fastexcel.reader.Row> rows = sheet.openStream()){
-                rows.forEach(cells -> {
-
-
-                });
-
-
-                rows.close();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            wb.close();
-        }catch (Exception e){
+        try {
+            var wb = new ReadableWorkbook(file);
+            Stream<org.dhatim.fastexcel.reader.Row> row = wb.getFirstSheet().openStream();
+            row.forEach(cells -> {
+                ArrayList<String> list = new ArrayList<>();
+                for (int i = 0; i < cells.getCellCount() ; i++) {
+                    org.dhatim.fastexcel.reader.Cell cell = cells.getCell(i);
+                    String getValue = (String) cell.getValue();
+                    list.add(getValue);
+                }
+                map.put(String.valueOf(count.get()) , list.toArray());
+                count.getAndIncrement();
+            });
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return map;
@@ -141,7 +139,7 @@ public class WriteExcelFile implements Serializable{
                 count++;
             }
             wb.close();
-            excelFile.close();
+            //excelFile.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -6,9 +6,12 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.poi.ss.usermodel.Cell;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -23,10 +26,11 @@ public class main_screen extends JFrame{
     private JComboBox comboBox1;
     private JScrollPane main_scroll_pane;
     private JButton read_button;
+    private JLabel counter;
     private JFileChooser jFileChooser;
 
     public main_screen(){
-        WebDriverManager.chromedriver().setup();
+        WebDriverManager.chromedriver().useBetaVersions().setup();
         Pattern pattern = Pattern.compile("[A-Z+a-z]");
         GetLinks getLinks = new GetLinks();
         String[] defaultComboBoxList = {"Trendyol"};
@@ -65,7 +69,7 @@ public class main_screen extends JFrame{
                         if(!jFileChooser.getSelectedFile().isFile()){
                             File files = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , jFileChooser);
                             if(!files.exists()) files.exists();
-                            getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser , enterUrlGetText);
+                            getLinks.getLinkInSites(comboBox1.getSelectedItem().toString().trim() , enterUrlGetText.toLowerCase().trim() , listModel , main_scroll_pane , jFileChooser , enterUrlGetText , counter);
                         }
                     }
                 }
@@ -95,25 +99,15 @@ public class main_screen extends JFrame{
                 jFileChooser.setAcceptAllFileFilterUsed(false);
                 if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     if(!jFileChooser.getSelectedFile().isFile()){
+
                         File files = new FileNameGenerator().writeFileSelectedLocation(enterURLTextField.getText()+".xlsx" , jFileChooser);
                         if(!files.exists()) {
                             files.exists();
                         }
                         file[0] = files;
 
-                        int size = writeExcelFile.getExcelFileRowSize(files) ;
-                        int columnSize = writeExcelFile.getExcelFileColumnSize(files);
-                        Map<String , Object[]> stringList = writeExcelFile.readExcelFile(files);
-                        if(stringList.isEmpty() || stringList == null){
-                            writeExcelFile.writeExcelFile(files , enterURLTextField.getText() , stringMap);
-                        }else{
-                            stringList.forEach((s, objects) -> {
-                                System.out.println(s);
-                                for ( Object o1: objects) {
-                                    System.out.println(o1);
-                                }
-                            });
-                        }
+                        Map<String , Object[]> map = writeExcelFile.readFastestExcelFile(files);
+                        writeExcelFile.writeFastestExcelFile(files, enterURLTextField.getText() , map);
                     }
                 }
                // writeExcelFile.writeExcelFileCustom(file[0] , 10 ,o);
