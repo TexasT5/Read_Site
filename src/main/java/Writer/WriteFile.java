@@ -22,14 +22,14 @@ public class WriteFile implements Serializable {
     FileNameGenerator fileNameGenerator = new FileNameGenerator();
     CGson gsonTrendyol = new CGson();
 
-    public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText, ExecutorService executorServices){
+    public void  writeAFile(Product product, JFileChooser getSelectedFile, List<String> getColors, String enterUrlGetText, ExecutorService executorServices, String getProductLink){
         File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
         Map<String , Object[]> stringList = writeExcelFile.readFastestExcelFile(file);
         int size = writeExcelFile.getExcelFileRowSize(file);
         int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
         stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
         for (int j = 0; j < totalSize; j++) {
-            Object[] objects = writeExcelFileProductDetail(product , getColors ,j);
+            Object[] objects = writeExcelFileProductDetail(product , getColors ,j , getProductLink);
             if(objects != null) {
                 stringList.put(String.valueOf(size) , objects);
                 size++;
@@ -132,7 +132,7 @@ public class WriteFile implements Serializable {
 
         return productDetail;
     }
-    private Object[] writeExcelFileProductDetail(Product product, List<String> getColors , int whichSizeBig){
+    private Object[] writeExcelFileProductDetail(Product product, List<String> getColors, int whichSizeBig, String getProductLink){
         Object[] objects = new Object[]{};
         String value = "";
         String price = "";
@@ -178,14 +178,23 @@ public class WriteFile implements Serializable {
         if(whichSizeBig < product.attributes.size()){
             keyName = checkNullVariable(product.attributes.get(whichSizeBig).key.name);
             valueName = checkNullVariable(product.attributes.get(whichSizeBig).value.name);
+        }else{
+            keyName = "";
+            valueName = "";
         }
+
         if(whichSizeBig < product.contentDescriptions.size()){
             contentDescription = checkNullVariable(product.contentDescriptions.get(whichSizeBig).description);
-        }
-        if(!body_barcode.isEmpty()){
-          objects = new Object[]{name,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
         }else{
-            objects = null;
+            contentDescription = "";
+        }
+
+        if(product.category.hierarchy.split("Giyim")[0].isEmpty()){
+            if(!body_barcode.isEmpty()){
+                objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
+            }
+        }else{
+            objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf("") , String.valueOf("") , String.valueOf("") , String.valueOf(""), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
         }
 
         return objects;

@@ -59,9 +59,9 @@ public class GetLinks implements Serializable {
                                 }
                                 driver.quit();
                             }
-                            listModel.addElement("https://www.trendyol.com"+getHref);
+                            listModel.addElement("https://www.trendyol.com/"+getHref);
                             try{
-                                driver.get("https://www.trendyol.com"+getHref);
+                                driver.get("https://www.trendyol.com/"+getHref);
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -74,7 +74,7 @@ public class GetLinks implements Serializable {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            getInformationInTheLink.getInformationTrendyolProducts(driver, getSelectedFile , enterUrlGetText , executorService);
+                            getInformationInTheLink.getInformationTrendyolProducts(driver, getSelectedFile , enterUrlGetText , executorService , ("https://www.trendyol.com/"+getHref));
                             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
                             scrollBar.setValue(scrollBar.getMaximum());
                         });

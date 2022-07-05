@@ -1,10 +1,10 @@
 package Model.Trendyol;
 
 public class Category {
-    String beautifiedName;
-    String hierarchy;
-    String name;
-    boolean refundable;
-    long id;
-    boolean isVASEnabled;
+   public String beautifiedName;
+   public String hierarchy;
+   public String name;
+   public boolean refundable;
+   public long id;
+   public boolean isVASEnabled;
 }
