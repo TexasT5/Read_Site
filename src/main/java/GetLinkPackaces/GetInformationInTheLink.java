@@ -30,6 +30,7 @@ public class GetInformationInTheLink implements Serializable {
         Element elements1 = jsoup.body();
         AtomicReference<JSONObject> jsonObjects = new AtomicReference<JSONObject>();
         @Nullable List<String> getColorsLink = new ArrayList<String>();
+        @Nullable List<String> getProductColorsLink = new ArrayList<>();
         getColorsLink.clear();
         elements1.getElementsByTag("script").forEach(element -> {
             element.dataNodes().forEach(dataNode -> {
@@ -44,11 +45,16 @@ public class GetInformationInTheLink implements Serializable {
         Elements document = elements1.getElementsByClass("slc-img");
         document.forEach(element -> {
             getColorsLink.add(element.attr("title"));
+            getProductColorsLink.add(element.attr("href"));
         });
-        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText , executorService , getProductLink);
+        writeAFileFuncPushed(getSelectedFile , jsonObjects.get() , getColorsLink , enterUrlGetText , executorService , getProductLink , getProductColorsLink);
     }
-    private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText, ExecutorService executorService, String getProductLink) {
-        TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
-        writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText , executorService , getProductLink);
+    private void writeAFileFuncPushed(JFileChooser getSelectedFile, JSONObject jsonObject, List<String> getColors, String enterUrlGetText, ExecutorService executorService, String getProductLink , List<String> getProductColorsLink) {
+        if(getProductColorsLink.isEmpty()){
+            TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
+            writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText , executorService , getProductLink);
+        }else{
+            writeFile.coloredProducts(getProductColorsLink , enterUrlGetText , getSelectedFile);
+        }
     }
 }

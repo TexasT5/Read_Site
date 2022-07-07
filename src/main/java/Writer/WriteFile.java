@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import Util.*;
@@ -36,9 +35,8 @@ public class WriteFile implements Serializable {
             }
         }
         writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
-
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -142,7 +140,7 @@ public class WriteFile implements Serializable {
         String imageURL = "";
 
         //Single
-        String barcode = product.allVariants.get(0).barcode;
+        String barcode = "";
         String name = product.name;
         String productCode = product.productCode;
         String sellingPrice = product.price.sellingPrice.text;
@@ -162,6 +160,7 @@ public class WriteFile implements Serializable {
             body_barcode = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).barcode));
             itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
         }
+
 
         if(whichSizeBig < getColors.size()){
             color = getColors.get(whichSizeBig);
@@ -210,38 +209,99 @@ public class WriteFile implements Serializable {
         }
         return returnedSafeString;
     }
+
+
     /* Area of colored products (down) */
-    public void coloredProducts(List<String> getColors, JFileChooser getSelectedFile, TrendyolModel trendyolModel) {
-        List<TrendyolModel> trendyolModelList = new ArrayList<TrendyolModel>();
-        AtomicInteger count = new AtomicInteger();
-        File file = fileNameGenerator.writeFileSelectedLocation(trendyolModel.product.name , getSelectedFile);
-        if(!file.exists()) file.mkdirs();
+    public void coloredProducts(List<String> getColors , String enterUrlGetText , JFileChooser getSelectedFile) {
+        File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
+        Map<String , Object[]> stringList = writeExcelFile.readFastestExcelFile(file);
+        List<TrendyolModel> colorsBarcode = new ArrayList<>();
         getColors.forEach(s -> {
             try {
-                Document document = new UJsoup().getDiv(s);
+                Document document = new UJsoup().getDiv("https://www.trendyol.com"+s);
                 document.body().getElementsByTag("script").dataNodes().forEach(dataNode -> {
                     String[] a = dataNode.getWholeData().trim().split("window\\.__PRODUCT_DETAIL_APP_INITIAL_STATE__");
                     if(a[0].isEmpty()){
                         JSONObject jsonObject = new JSONObject(a[1].trim().split("=" , 2)[1].trim().split("window\\.TYPageName=")[0]);
-                        trendyolModelList.add(gsonTrendyol.convertTrendyolModel(jsonObject));
+                        TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
+                        colorsBarcode.add(trendyolModel);
+
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        trendyolModelList.forEach(trendyolModel1 -> {
-           File underFile =  fileNameGenerator.writeFileInFile(String.valueOf(trendyolModel1.product.name + trendyolModel1.product.allVariants.get(0).barcode) , file);
-           if(!underFile.exists()) underFile.mkdirs();
-            try {
-                writeFileInDirectory(underFile , trendyolModel1.product);
-                trendyolModel1.product.images.forEach(getImages -> {
-                    getImageFromUrl.getLinkFromUrlAndWriteFolder("https://cdn.dsmcdn.com/"+getImages , underFile , count.getAndIncrement());
+        AtomicInteger count = new AtomicInteger();
+        colorsBarcode.forEach(trendyolModel -> {
+            List<Object[]> objects = new ArrayList<>();
+            int totalCount = trendyolModel.product.allVariants.size() + trendyolModel.product.contentDescriptions.size() + trendyolModel.product.attributes.size() + trendyolModel.product.images.size();
+            for (int i = 0; i < totalCount; i++) {
+                objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList("") , i , ""));
+                objects.forEach(objects1 -> {
+                    stringList.put(String.valueOf(count.get()) , objects1);
                 });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                count.getAndIncrement();
             }
         });
+        writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
+    }
+    public Object[] coloredProductWritable(Product trendyolModelList) {
+        Object[] objects = new Object[]{};
+
+        String value = "";
+        String price = "";
+        String inStock = "";
+        String itemNumber = "";
+        String body_barcode = "";
+        String imageURL = "";
+
+        //Single
+        String barcode = "";
+        String name = "";
+        String productCode = "";
+        String sellingPrice = "";
+        String originalPrice = "";
+        String discountedPrice = "";
+        String color = "";
+
+        String keyName = "";
+        String valueName = "";
+
+        String contentDescription = "";
+
+        name = trendyolModelList.name;
+        productCode = trendyolModelList.productCode;
+        barcode = trendyolModelList.allVariants.get(0).barcode;
+        sellingPrice = trendyolModelList.price.sellingPrice.text.toString();
+        discountedPrice = trendyolModelList.price.discountedPrice.text.toString();
+        originalPrice = trendyolModelList.price.originalPrice.text;
+        color = trendyolModelList.color;
+
+        for (int j = 0; j < trendyolModelList.allVariants.size(); j++) {
+            value = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).value));
+            price = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).price));
+            inStock = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).inStock));
+            body_barcode = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).barcode));
+            itemNumber = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).itemNumber));
+        }
+
+        for (int j = 0; j < trendyolModelList.contentDescriptions.size() ; j++) {
+            contentDescription = trendyolModelList.contentDescriptions.get(j).description;
+        }
+
+
+        for (int j = 0; j < trendyolModelList.attributes.size() ; j++) {
+            keyName = trendyolModelList.attributes.get(j).key.name;
+            valueName = trendyolModelList.attributes.get(j).value.name;
+        }
+
+        for (int j = 0; j < trendyolModelList.images.size(); j++) {
+            imageURL = trendyolModelList.images.get(j);
+        }
+
+        objects = new Object[]{trendyolModelList.name, imageURL ,trendyolModelList.productCode,trendyolModelList.allVariants.get(0).barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
+        return objects;
     }
     private File checkFile(String enterUrlGetText , JFileChooser getSelectedFile){
         File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
