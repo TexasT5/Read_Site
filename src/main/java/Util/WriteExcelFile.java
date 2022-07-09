@@ -17,6 +17,7 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.stream.Stream;
 
 public class WriteExcelFile implements Serializable{
@@ -48,7 +49,6 @@ public class WriteExcelFile implements Serializable{
 
     public Map<String , Object[]> readFastestExcelFile(File file){
         Map<String , Object[]> map = new TreeMap<>();
-        ArrayList<String> convertableMapObject = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
         try {
             var wb = new ReadableWorkbook(file);

@@ -54,7 +54,7 @@ public class GetInformationInTheLink implements Serializable {
             TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
             writeFile.writeAFile(trendyolModel.product, getSelectedFile, getColors , enterUrlGetText , executorService , getProductLink);
         }else{
-            writeFile.coloredProducts(getProductColorsLink , enterUrlGetText , getSelectedFile);
+            writeFile.coloredProducts(getProductColorsLink , getColors ,  enterUrlGetText , getSelectedFile , getProductLink);
         }
     }
 }

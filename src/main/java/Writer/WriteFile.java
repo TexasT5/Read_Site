@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import Util.*;
 import org.json.JSONObject;
@@ -28,7 +31,7 @@ public class WriteFile implements Serializable {
         int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
         stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
         for (int j = 0; j < totalSize; j++) {
-            Object[] objects = writeExcelFileProductDetail(product , getColors ,j , getProductLink);
+            Object[] objects = writeExcelFileProductDetail(product , Arrays.asList() ,j , getProductLink);
             if(objects != null) {
                 stringList.put(String.valueOf(size) , objects);
                 size++;
@@ -36,7 +39,7 @@ public class WriteFile implements Serializable {
         }
         writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
         try {
-            Thread.sleep(100);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -140,7 +143,7 @@ public class WriteFile implements Serializable {
         String imageURL = "";
 
         //Single
-        String barcode = "";
+        String barcode = product.allVariants.get(0).barcode;
         String name = product.name;
         String productCode = product.productCode;
         String sellingPrice = product.price.sellingPrice.text;
@@ -161,12 +164,6 @@ public class WriteFile implements Serializable {
             itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
         }
 
-
-        if(whichSizeBig < getColors.size()){
-            color = getColors.get(whichSizeBig);
-        }else{
-            color = "";
-        }
 
         if(whichSizeBig < product.images.size()){
             imageURL = "https://cdn.dsmcdn.com"+product.images.get(whichSizeBig);
@@ -189,7 +186,7 @@ public class WriteFile implements Serializable {
         }
 
         if(product.category.hierarchy.split("Giyim")[0].isEmpty()){
-            if(!body_barcode.isEmpty()){
+            if(!body_barcode.isEmpty() ){
                 objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
             }
         }else{
@@ -210,13 +207,15 @@ public class WriteFile implements Serializable {
         return returnedSafeString;
     }
 
-
     /* Area of colored products (down) */
-    public void coloredProducts(List<String> getColors , String enterUrlGetText , JFileChooser getSelectedFile) {
+    public void coloredProducts(List<String> getProductColorsLink, List<String> getColors, String enterUrlGetText, JFileChooser getSelectedFile, String getProductLink) {
         File file = fileNameGenerator.writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-        Map<String , Object[]> stringList = writeExcelFile.readFastestExcelFile(file);
+        AtomicReference<Map<String, Object[]>> stringList = new AtomicReference<>(writeExcelFile.readFastestExcelFile(file));
+        AtomicInteger size = new AtomicInteger(writeExcelFile.getExcelFileRowSize(file));
         List<TrendyolModel> colorsBarcode = new ArrayList<>();
-        getColors.forEach(s -> {
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+        stringList.get().put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+        getProductColorsLink.forEach(s -> {
             try {
                 Document document = new UJsoup().getDiv("https://www.trendyol.com"+s);
                 document.body().getElementsByTag("script").dataNodes().forEach(dataNode -> {
@@ -225,26 +224,39 @@ public class WriteFile implements Serializable {
                         JSONObject jsonObject = new JSONObject(a[1].trim().split("=" , 2)[1].trim().split("window\\.TYPageName=")[0]);
                         TrendyolModel trendyolModel = gsonTrendyol.convertTrendyolModel(jsonObject);
                         colorsBarcode.add(trendyolModel);
-
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        AtomicInteger count = new AtomicInteger();
+
+
         colorsBarcode.forEach(trendyolModel -> {
+            stringList.set(writeExcelFile.readFastestExcelFile(file));
             List<Object[]> objects = new ArrayList<>();
             int totalCount = trendyolModel.product.allVariants.size() + trendyolModel.product.contentDescriptions.size() + trendyolModel.product.attributes.size() + trendyolModel.product.images.size();
-            for (int i = 0; i < totalCount; i++) {
-                objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList("") , i , ""));
+            for (int i = 0; i <= totalCount; i++) {
+                objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList() , i , getProductLink));
                 objects.forEach(objects1 -> {
-                    stringList.put(String.valueOf(count.get()) , objects1);
+                    try{
+                        if (objects1 != null && objects1[0] != ""){
+                            stringList.get().put(String.valueOf(size.get()) , objects1);
+                            atomicBoolean.set(true);
+                        }else{
+                            atomicBoolean.set(false);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 });
-                count.getAndIncrement();
+                if(atomicBoolean.get()) {
+                    size.getAndIncrement();
+                }
+
+                writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList.get());
             }
         });
-        writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList);
     }
     public Object[] coloredProductWritable(Product trendyolModelList) {
         Object[] objects = new Object[]{};
