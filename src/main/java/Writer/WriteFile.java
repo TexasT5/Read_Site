@@ -162,6 +162,12 @@ public class WriteFile implements Serializable {
             inStock = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).inStock));
             body_barcode = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).barcode));
             itemNumber = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).itemNumber));
+        }else{
+            value = "";
+            price = "";
+            inStock = "";
+            body_barcode = "";
+            itemNumber = "";
         }
 
 
@@ -186,7 +192,7 @@ public class WriteFile implements Serializable {
         }
 
         if(product.category.hierarchy.split("Giyim")[0].isEmpty()){
-            if(!body_barcode.isEmpty() ){
+            if(!body_barcode.isEmpty()){
                 objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
             }
         }else{
@@ -213,7 +219,6 @@ public class WriteFile implements Serializable {
         AtomicReference<Map<String, Object[]>> stringList = new AtomicReference<>(writeExcelFile.readFastestExcelFile(file));
         AtomicInteger size = new AtomicInteger(writeExcelFile.getExcelFileRowSize(file));
         List<TrendyolModel> colorsBarcode = new ArrayList<>();
-        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         stringList.get().put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
         getProductColorsLink.forEach(s -> {
             try {
@@ -233,91 +238,22 @@ public class WriteFile implements Serializable {
 
 
         colorsBarcode.forEach(trendyolModel -> {
-            stringList.set(writeExcelFile.readFastestExcelFile(file));
             List<Object[]> objects = new ArrayList<>();
             int totalCount = trendyolModel.product.allVariants.size() + trendyolModel.product.contentDescriptions.size() + trendyolModel.product.attributes.size() + trendyolModel.product.images.size();
-            for (int i = 0; i <= totalCount; i++) {
+            for (int i = 0; i < totalCount; i++) {
                 objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList() , i , getProductLink));
                 objects.forEach(objects1 -> {
                     try{
                         if (objects1 != null && objects1[0] != ""){
                             stringList.get().put(String.valueOf(size.get()) , objects1);
-                            atomicBoolean.set(true);
-                        }else{
-                            atomicBoolean.set(false);
                         }
                     }catch (Exception e){
                         e.printStackTrace();
                     }
                 });
-                if(atomicBoolean.get()) {
-                    size.getAndIncrement();
-                }
-
-                writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList.get());
+                size.getAndIncrement();
             }
+            writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList.get());
         });
-    }
-    public Object[] coloredProductWritable(Product trendyolModelList) {
-        Object[] objects = new Object[]{};
-
-        String value = "";
-        String price = "";
-        String inStock = "";
-        String itemNumber = "";
-        String body_barcode = "";
-        String imageURL = "";
-
-        //Single
-        String barcode = "";
-        String name = "";
-        String productCode = "";
-        String sellingPrice = "";
-        String originalPrice = "";
-        String discountedPrice = "";
-        String color = "";
-
-        String keyName = "";
-        String valueName = "";
-
-        String contentDescription = "";
-
-        name = trendyolModelList.name;
-        productCode = trendyolModelList.productCode;
-        barcode = trendyolModelList.allVariants.get(0).barcode;
-        sellingPrice = trendyolModelList.price.sellingPrice.text.toString();
-        discountedPrice = trendyolModelList.price.discountedPrice.text.toString();
-        originalPrice = trendyolModelList.price.originalPrice.text;
-        color = trendyolModelList.color;
-
-        for (int j = 0; j < trendyolModelList.allVariants.size(); j++) {
-            value = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).value));
-            price = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).price));
-            inStock = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).inStock));
-            body_barcode = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).barcode));
-            itemNumber = checkNullVariable(String.valueOf(trendyolModelList.allVariants.get(j).itemNumber));
-        }
-
-        for (int j = 0; j < trendyolModelList.contentDescriptions.size() ; j++) {
-            contentDescription = trendyolModelList.contentDescriptions.get(j).description;
-        }
-
-
-        for (int j = 0; j < trendyolModelList.attributes.size() ; j++) {
-            keyName = trendyolModelList.attributes.get(j).key.name;
-            valueName = trendyolModelList.attributes.get(j).value.name;
-        }
-
-        for (int j = 0; j < trendyolModelList.images.size(); j++) {
-            imageURL = trendyolModelList.images.get(j);
-        }
-
-        objects = new Object[]{trendyolModelList.name, imageURL ,trendyolModelList.productCode,trendyolModelList.allVariants.get(0).barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
-        return objects;
-    }
-    private File checkFile(String enterUrlGetText , JFileChooser getSelectedFile){
-        File file = new FileNameGenerator().writeFileSelectedLocation(enterUrlGetText+".xlsx" , getSelectedFile);
-        if(!file.exists()) file.exists();
-        return file;
     }
 }

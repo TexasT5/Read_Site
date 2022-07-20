@@ -17,10 +17,13 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.stream.Stream;
 
 public class WriteExcelFile implements Serializable{
+    private static List<String> checkCells = new ArrayList<>();
+
     public void writeExcelFile(File file  , String  getEnterUrl , Map<String , Object[]> map){
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet spreadsheet = workbook.createSheet(getEnterUrl);
