@@ -9,12 +9,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import Util.*;
+import cn.hutool.core.lang.tree.Tree;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 
@@ -31,7 +30,7 @@ public class WriteFile implements Serializable {
         int totalSize = product.allVariants.size() + product.contentDescriptions.size() + product.variants.size();
         stringList.put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
         for (int j = 0; j < totalSize; j++) {
-            Object[] objects = writeExcelFileProductDetail(product , Arrays.asList() ,j , getProductLink);
+            Object[] objects = writeExcelFileProductDetail(product , Arrays.asList() ,j , getProductLink , new TreeMap<String , String>());
             if(objects != null) {
                 stringList.put(String.valueOf(size) , objects);
                 size++;
@@ -133,7 +132,7 @@ public class WriteFile implements Serializable {
 
         return productDetail;
     }
-    private Object[] writeExcelFileProductDetail(Product product, List<String> getColors, int whichSizeBig, String getProductLink){
+    private Object[] writeExcelFileProductDetail(Product product, List<String> getColors, int whichSizeBig, String getProductLink, Map<String , String> map){
         Object[] objects = new Object[]{};
         String value = "";
         String price = "";
@@ -141,6 +140,7 @@ public class WriteFile implements Serializable {
         String itemNumber = "";
         String body_barcode = "";
         String imageURL = "";
+        String colorsProductsLinkText = "";
 
         //Single
         String barcode = product.allVariants.get(0).barcode;
@@ -156,7 +156,7 @@ public class WriteFile implements Serializable {
 
         String contentDescription = "";
 
-        if(whichSizeBig < product.allVariants.size() ){
+        if(whichSizeBig < product.allVariants.size()){
             value = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).value));
             price = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).price));
             inStock = checkNullVariable(String.valueOf(product.allVariants.get(whichSizeBig).inStock));
@@ -168,6 +168,10 @@ public class WriteFile implements Serializable {
             inStock = "";
             body_barcode = "";
             itemNumber = "";
+        }
+
+        if (!map.isEmpty()) {
+            colorsProductsLinkText="https://www.trendyol.com"+map.get(String.valueOf(color+product.allVariants.get(0).barcode));
         }
 
 
@@ -193,7 +197,11 @@ public class WriteFile implements Serializable {
 
         if(product.category.hierarchy.split("Giyim")[0].isEmpty()){
             if(!body_barcode.isEmpty()){
-                objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
+                if(!colorsProductsLinkText.equals("")){
+                    objects = new Object[]{name, colorsProductsLinkText,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
+                }else{
+                    objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf(value) , String.valueOf(body_barcode) , String.valueOf(itemNumber) , String.valueOf(price), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
+                }
             }
         }else{
             objects = new Object[]{name, getProductLink,productCode,barcode,sellingPrice,discountedPrice , originalPrice, color ,String.valueOf("") , String.valueOf("") , String.valueOf("") , String.valueOf(""), String.valueOf(inStock)  , String.valueOf(contentDescription) , String.valueOf(keyName) , String.valueOf(valueName) , String.valueOf(imageURL)};
@@ -220,6 +228,7 @@ public class WriteFile implements Serializable {
         AtomicInteger size = new AtomicInteger(writeExcelFile.getExcelFileRowSize(file));
         List<TrendyolModel> colorsBarcode = new ArrayList<>();
         stringList.get().put("0" , new ExcelTitles().TRENDYOL_LARGE_TITLE);
+        Map<String , String> map = new TreeMap<String , String>();
         getProductColorsLink.forEach(s -> {
             try {
                 Document document = new UJsoup().getDiv("https://www.trendyol.com"+s);
@@ -237,11 +246,18 @@ public class WriteFile implements Serializable {
         });
 
 
+
         colorsBarcode.forEach(trendyolModel -> {
             List<Object[]> objects = new ArrayList<>();
             int totalCount = trendyolModel.product.allVariants.size() + trendyolModel.product.contentDescriptions.size() + trendyolModel.product.attributes.size() + trendyolModel.product.images.size();
+
+            for (int i = 0; i < getProductColorsLink.size(); i++) {
+                String color = getColors.get(i);
+                String link =  getProductColorsLink.get(i);
+                map.put(String.valueOf(color+trendyolModel.product.allVariants.get(0).barcode) , link);
+            }
             for (int i = 0; i < totalCount; i++) {
-                objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList() , i , getProductLink));
+                objects.add(writeExcelFileProductDetail(trendyolModel.product , Arrays.asList() , i , getProductLink , map));
                 objects.forEach(objects1 -> {
                     try{
                         if (objects1 != null && objects1[0] != ""){
@@ -252,6 +268,11 @@ public class WriteFile implements Serializable {
                     }
                 });
                 size.getAndIncrement();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             writeExcelFile.fastestExcelLibrary(file , enterUrlGetText , stringList.get());
         });
